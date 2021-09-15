@@ -1,0 +1,25 @@
+set(LIBRARY_NAME "${PROJECT_NAME}")
+
+set(LIBRARY_SRC_PATH     		"${LIBRARY_MODULE_PATH}")
+set(LIBRARY_PUBLIC_INCLUDE_PATH 	"${PROJECT_SOURCE_DIR}")
+set(LIBRARY_PRIVATE_INCLUDE_PATH	"${LIBRARY_MODULE_PATH}")
+
+add_library(
+	${LIBRARY_NAME} 
+	test.h
+	test.cpp
+)
+
+target_include_directories(${LIBRARY_NAME}
+    PUBLIC
+        $<INSTALL_INTERFACE:include>
+        $<BUILD_INTERFACE:${LIBRARY_PUBLIC_INCLUDE_PATH}>
+    PRIVATE
+        ${LIBRARY_MODULE_PATH}
+)
+
+target_compile_features(${LIBRARY_NAME} PRIVATE cxx_std_17)
+target_link_libraries(${LIBRARY_NAME} ${CONAN_LIBS})
+
+set(LIBRARY_NAME ${LIBRARY_NAME} PARENT_SCOPE)
+set(CMAKE_CXX_FLAGS_DEBUG "/MDd")
