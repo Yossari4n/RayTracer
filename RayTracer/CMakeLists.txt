@@ -5,9 +5,11 @@ set(LIBRARY_PUBLIC_INCLUDE_PATH 	"${PROJECT_SOURCE_DIR}")
 set(LIBRARY_PRIVATE_INCLUDE_PATH	"${LIBRARY_MODULE_PATH}")
 
 add_library(
-	${LIBRARY_NAME} 
-	test.h
-	test.cpp
+	${LIBRARY_NAME}
+	Color.h
+	IRenderTarget.h
+	PPMTarget.h
+	PPMTarget.cpp
 )
 
 target_include_directories(${LIBRARY_NAME}
