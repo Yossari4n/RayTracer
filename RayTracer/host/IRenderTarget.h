@@ -1,9 +1,9 @@
 #ifndef IRenderTarget_h
 #define IRenderTarget_h
 
-namespace rt {
+#include "../Color.h"
 
-class Color;
+namespace rt {
 
 class IRenderTarget {
 public:

@@ -1,7 +1,5 @@
 #include "PPMTarget.h"
 
-#include "../Color.h"
-
 #include <iostream>
 
 namespace rt {
