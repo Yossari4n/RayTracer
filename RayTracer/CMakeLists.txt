@@ -7,6 +7,9 @@ set(LIBRARY_PRIVATE_INCLUDE_PATH	"${LIBRARY_MODULE_PATH}")
 set(
 	SOURCE_LIST
 	"Color.h"
+	"Math.h"
+	"Ray.h"
+	"Ray.cpp"
 	"host/IRenderTarget.h"
 	"host/PPMTarget.h"
 	"host/PPMTarget.cpp"
