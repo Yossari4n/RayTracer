@@ -20,6 +20,7 @@ public:
 private:
     size_t m_Width;
     size_t m_Height;
+
     std::vector<Color> m_FrameBuffer;
 };
 

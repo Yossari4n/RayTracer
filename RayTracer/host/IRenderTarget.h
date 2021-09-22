@@ -1,13 +1,13 @@
 #ifndef IRenderTarget_h
 #define IRenderTarget_h
 
-#include "Color.h"
-
 namespace rt {
+
+class Color;
 
 class IRenderTarget {
 public:
-    virtual ~IRenderTarget() = default;
+    virtual ~IRenderTarget() {}
 
     virtual void WriteColor(size_t x, size_t y, const Color& color, unsigned int samples_per_pixel) = 0;
     virtual void SaveBuffer() = 0;

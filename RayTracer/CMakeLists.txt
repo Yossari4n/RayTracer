@@ -4,13 +4,20 @@ set(LIBRARY_SRC_PATH     		"${LIBRARY_MODULE_PATH}")
 set(LIBRARY_PUBLIC_INCLUDE_PATH 	"${PROJECT_SOURCE_DIR}")
 set(LIBRARY_PRIVATE_INCLUDE_PATH	"${LIBRARY_MODULE_PATH}")
 
+set(
+	SOURCE_LIST
+	"Color.h"
+	"host/IRenderTarget.h"
+	"host/PPMTarget.h"
+	"host/PPMTarget.cpp"
+)
+
 add_library(
 	${LIBRARY_NAME}
-	Color.h
-	IRenderTarget.h
-	PPMTarget.h
-	PPMTarget.cpp
+	${SOURCE_LIST}
 )
+
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_LIST})
 
 target_include_directories(${LIBRARY_NAME}
     PUBLIC
@@ -24,4 +31,3 @@ target_compile_features(${LIBRARY_NAME} PRIVATE cxx_std_17)
 target_link_libraries(${LIBRARY_NAME} ${CONAN_LIBS})
 
 set(LIBRARY_NAME ${LIBRARY_NAME} PARENT_SCOPE)
-set(CMAKE_CXX_FLAGS_DEBUG "/MDd")

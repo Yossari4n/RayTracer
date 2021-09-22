@@ -1,5 +1,7 @@
 #include "PPMTarget.h"
 
+#include "../Color.h"
+
 #include <iostream>
 
 namespace rt {
@@ -17,15 +19,19 @@ void PPMTarget::WriteColor(size_t x, size_t y, const Color& color, unsigned int 
     const float b = sqrtf(scale * color.z);
 
     const size_t index = y * m_Width + x;
-    m_FrameBuffer[index] = Color(r, g, b);
+    m_FrameBuffer.at(index) = Color(r, g, b);
 }
 
 void PPMTarget::SaveBuffer() {
     std::cout << "P3\n" << m_Width << ' ' << m_Height << "\n255\n";
-    for (const auto& pixel : m_FrameBuffer) {
-        std::cout   << static_cast<int>(256 * glm::clamp(pixel.r, 0.0f, 0.999f)) << ' '
-                    << static_cast<int>(256 * glm::clamp(pixel.g, 0.0f, 0.999f)) << ' '
-                    << static_cast<int>(256 * glm::clamp(pixel.b, 0.0f, 0.999f)) << '\n';
+
+    const size_t size = m_Width * m_Height;
+    for (size_t i = 0; i < size; i++) {
+        const Color color = m_FrameBuffer.at(i);
+
+        std::cout   << static_cast<int>(256 * glm::clamp(color.r, 0.0f, 0.999f)) << ' '
+                    << static_cast<int>(256 * glm::clamp(color.g, 0.0f, 0.999f)) << ' '
+                    << static_cast<int>(256 * glm::clamp(color.b, 0.0f, 0.999f)) << '\n';
     }
 }
 
