@@ -10,9 +10,13 @@ set(
 	"Math.h"
 	"Ray.h"
 	"Ray.cpp"
+	"Scene.h"
+	"Scene.cpp"
 	"host/IRenderTarget.h"
 	"host/PPMTarget.h"
 	"host/PPMTarget.cpp"
+	"host/StaticScene.h"
+	"host/StaticScene.cpp"
 )
 
 add_library(
