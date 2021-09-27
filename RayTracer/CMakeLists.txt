@@ -17,6 +17,9 @@ set(
 	"host/PPMTarget.cpp"
 	"host/StaticScene.h"
 	"host/StaticScene.cpp"
+	"host/IRayGenerator.h"
+	"host/Camera.h"
+	"host/Camera.cpp"
 )
 
 add_library(
