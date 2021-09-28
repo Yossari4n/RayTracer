@@ -12,6 +12,8 @@ set(
 	"Ray.cpp"
 	"Scene.h"
 	"Scene.cpp"
+	"Triangle.h"
+	"Triangle.cpp"
 	"host/IRenderTarget.h"
 	"host/PPMTarget.h"
 	"host/PPMTarget.cpp"
