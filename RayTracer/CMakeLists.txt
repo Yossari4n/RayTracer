@@ -20,6 +20,9 @@ set(
 	"host/IRayGenerator.h"
 	"host/Camera.h"
 	"host/Camera.cpp"
+	"host/ISpacePartitioner.h"
+	"host/BruteForce.h"
+	"host/BruteForce.cpp"
 )
 
 add_library(

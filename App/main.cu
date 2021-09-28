@@ -1,6 +1,9 @@
 #include <RayTracer/host/StaticScene.h>
 #include <RayTracer/host/Camera.h>
+#include <RayTracer/host/BruteForce.h>
 #include <RayTracer/host/PPMTarget.h>
+
+
 #include <iostream>
 
 int main() {
@@ -13,8 +16,9 @@ int main() {
         0.1f,                               // aperture
         10.0f                               // focus_distance
     );
+    rt::BruteForce bf;
     rt::PPMTarget target(800, 600);
-    rt::StaticScene scene(&camera, nullptr, &target);
+    rt::StaticScene scene(&camera, &bf, &target);
 
     return 0;
 }
