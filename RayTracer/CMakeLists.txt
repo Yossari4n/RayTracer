@@ -24,6 +24,8 @@ set(
 	"host/IRenderTarget.h"
 	"host/PPMTarget.h"
 	"host/PPMTarget.cpp"
+	"host/Mesh.h"
+	"host/Mesh.cpp"
 )
 
 add_library(

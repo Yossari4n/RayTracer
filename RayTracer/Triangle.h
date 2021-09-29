@@ -15,6 +15,8 @@ public:
         float m_Time;
     };
 
+    Triangle(const Point3& v1, const Point3& v2, const Point3& v3);
+
     bool Hit(const Ray& ray, float minTime, float maxTime, HitResult& result) const;
 
     Point3 V0() const;

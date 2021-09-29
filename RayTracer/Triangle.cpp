@@ -2,6 +2,11 @@
 
 namespace rt {
 
+Triangle::Triangle(const Point3& v1, const Point3& v2, const Point3& v3)
+    : m_V0(v1)
+    , m_V1(v2)
+    , m_V2(v3) {}
+
 bool Triangle::Hit(const Ray& ray, float minTime, float maxTime, Triangle::HitResult& result) const {
     const Vector3 edge1 = m_V1 - m_V0;
     const Vector3 edge2 = m_V2 - m_V0;

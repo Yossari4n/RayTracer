@@ -1,10 +1,10 @@
-#include <RayTracer/host/StaticScene.h>
+#include <RayTracer/host/Scene.h>
 #include <RayTracer/host/Camera.h>
 #include <RayTracer/host/BruteForce.h>
 #include <RayTracer/host/PPMTarget.h>
 
-
 #include <iostream>
+#include <string>
 
 int main() {
     rt::Camera camera(
@@ -18,7 +18,9 @@ int main() {
     );
     rt::BruteForce bf;
     rt::PPMTarget target(800, 600);
-    rt::StaticScene scene(&camera, &bf, &target);
+    rt::Scene scene(&camera, &bf, &target);
+
+    scene.LoadScene("../../scenes/suzanne.obj");
 
     return 0;
 }
