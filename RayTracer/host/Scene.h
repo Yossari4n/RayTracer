@@ -10,9 +10,8 @@ class IRenderTarget;
 class Scene {
 public:
     Scene(IRayGenerator* ray_generator, ISpacePartitioner* space_partitioner, IRenderTarget* render_target);
-    virtual ~Scene() = default;
 
-    virtual void GenerateFrame(unsigned int samples_per_pixel, unsigned int max_depth) const = 0;
+    void GenerateFrame(unsigned int samples_per_pixel, unsigned int max_depth) const;
 
 protected:
     IRayGenerator* m_RayGenerator;

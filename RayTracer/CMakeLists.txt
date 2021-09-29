@@ -10,21 +10,20 @@ set(
 	"Math.h"
 	"Ray.h"
 	"Ray.cpp"
-	"Scene.h"
-	"Scene.cpp"
 	"Triangle.h"
 	"Triangle.cpp"
-	"host/IRenderTarget.h"
-	"host/PPMTarget.h"
-	"host/PPMTarget.cpp"
-	"host/StaticScene.h"
-	"host/StaticScene.cpp"
+
+	"host/Scene.h"
+	"host/Scene.cpp"
 	"host/IRayGenerator.h"
 	"host/Camera.h"
 	"host/Camera.cpp"
 	"host/ISpacePartitioner.h"
 	"host/BruteForce.h"
 	"host/BruteForce.cpp"
+	"host/IRenderTarget.h"
+	"host/PPMTarget.h"
+	"host/PPMTarget.cpp"
 )
 
 add_library(
