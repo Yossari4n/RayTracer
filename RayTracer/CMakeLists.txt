@@ -26,6 +26,11 @@ set(
 	"host/PPMTarget.cpp"
 	"host/Mesh.h"
 	"host/Mesh.cpp"
+	"host/IMaterial.h"
+	"host/Lambertian.h"
+	"host/Lambertian.cpp"
+	"host/DiffuseLight.h"
+	"host/DiffuseLight.cpp"
 )
 
 add_library(

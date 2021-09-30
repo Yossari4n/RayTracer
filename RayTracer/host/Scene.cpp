@@ -30,7 +30,7 @@ void Scene::LoadScene(const std::string& path) {
 
     std::vector<Mesh> meshes;
     meshes.reserve(scene->mNumMeshes);
-    for(int i = 0; i < scene->mNumMeshes; i++) {
+    for(unsigned int i = 0; i < scene->mNumMeshes; i++) {
         meshes.emplace_back(scene->mMeshes[i]);
     }
 }
