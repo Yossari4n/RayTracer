@@ -1,3 +1,6 @@
+#define TINYOBJLOADER_IMPLEMENTATION 
+#include "../RayTracer/tiny_obj_loader.h"
+
 #include <RayTracer/host/Scene.h>
 #include <RayTracer/host/Camera.h>
 #include <RayTracer/host/BruteForce.h>
@@ -20,7 +23,7 @@ int main() {
     rt::PPMTarget target(800, 600);
     rt::Scene scene(&camera, &bf, &target);
 
-    scene.LoadScene("../../scenes/suzanne.obj");
+    scene.LoadScene("../../scenes/cornell_box.obj");
 
     return 0;
 }

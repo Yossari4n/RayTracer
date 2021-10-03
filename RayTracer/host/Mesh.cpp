@@ -3,15 +3,28 @@
 
 namespace rt {
 
-Mesh::Mesh(const aiMesh* mesh) {
-    for(int i = 0; i < mesh->mNumFaces; i++) {
-        const aiFace* face = &mesh->mFaces[i];
-        for(int j = 0; j < face->mNumIndices - 2; j += 3) {
-            const Point3 v1(mesh->mVertices[face->mIndices[j]].x, mesh->mVertices[face->mIndices[j]].y, mesh->mVertices[face->mIndices[j]].z);
-            const Point3 v2(mesh->mVertices[face->mIndices[j + 1]].x, mesh->mVertices[face->mIndices[j + 1]].y, mesh->mVertices[face->mIndices[j + 1]].z);
-            const Point3 v3(mesh->mVertices[face->mIndices[j + 2]].x, mesh->mVertices[face->mIndices[j + 2]].y, mesh->mVertices[face->mIndices[j + 2]].z);
-            m_Triangles.emplace_back(v1, v2, v3);
-        }
+Mesh::Mesh(const tinyobj::attrib_t& attrib, const tinyobj::shape_t& shape) {
+    const size_t size = shape.mesh.num_face_vertices.size();
+
+    for(size_t j = 0; j < size; j++) {
+        tinyobj::index_t idx = shape.mesh.indices[j];
+        tinyobj::real_t x1 = attrib.vertices[3 * size_t(idx.vertex_index) + 0];
+        tinyobj::real_t y1 = attrib.vertices[3 * size_t(idx.vertex_index) + 1];
+        tinyobj::real_t z1 = attrib.vertices[3 * size_t(idx.vertex_index) + 2];
+
+        tinyobj::real_t x2 = attrib.vertices[3 * size_t(idx.vertex_index) + 3];
+        tinyobj::real_t y2 = attrib.vertices[3 * size_t(idx.vertex_index) + 4];
+        tinyobj::real_t z2 = attrib.vertices[3 * size_t(idx.vertex_index) + 5];
+
+        tinyobj::real_t x3 = attrib.vertices[3 * size_t(idx.vertex_index) + 6];
+        tinyobj::real_t y3 = attrib.vertices[3 * size_t(idx.vertex_index) + 7];
+        tinyobj::real_t z3 = attrib.vertices[3 * size_t(idx.vertex_index) + 8];
+
+        m_Triangles.emplace_back(
+            Point3(x1, y1, z1),
+            Point3(x2, y2, z2),
+            Point3(x3, y3, z3)
+        );
     }
 }
 

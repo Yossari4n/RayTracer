@@ -12,6 +12,7 @@ set(
 	"Ray.cpp"
 	"Triangle.h"
 	"Triangle.cpp"
+	"tiny_obj_loader.h"
 
 	"host/Scene.h"
 	"host/Scene.cpp"

@@ -1,9 +1,7 @@
 #include "Scene.h"
 
 #pragma warning(push, 0)
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
+#include "../tiny_obj_loader.h"
 #pragma warning(pop)
 
 #include "IRayGenerator.h"
@@ -21,17 +19,28 @@ Scene::Scene(IRayGenerator* ray_generator, ISpacePartitioner* space_partitioner,
     , m_RenderTarget(render_target) {}
 
 void Scene::LoadScene(const std::string& path) {
-    Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(path.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs);
-    if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-        std::cerr << "Failed to load model\n";
+    tinyobj::ObjReaderConfig config;
+
+    tinyobj::ObjReader reader;
+    if(!reader.ParseFromFile(path, config)) {
+        if(!reader.Error().empty()) {
+            std::cerr << "[LoadScene][Error] Failed to load scene " << path << '\n' << reader.Error();
+        }
         return;
     }
 
+    if(!reader.Warning().empty()) {
+        std::cerr << "[LoadScene][Warning] " << reader.Warning();
+    }
+
+    auto& attrib = reader.GetAttrib();
+    auto& shapes = reader.GetShapes();
+    auto& materials = reader.GetMaterials();
+
     std::vector<Mesh> meshes;
-    meshes.reserve(scene->mNumMeshes);
-    for(unsigned int i = 0; i < scene->mNumMeshes; i++) {
-        meshes.emplace_back(scene->mMeshes[i]);
+    meshes.reserve(shapes.size());
+    for(const auto& shape : shapes) {
+        meshes.emplace_back(attrib, shape);
     }
 }
 

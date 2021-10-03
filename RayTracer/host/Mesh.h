@@ -1,9 +1,7 @@
 #ifndef Mesh_h
 #define Mesh_h
 
-#pragma warning(push, 0)
-#include <assimp/scene.h>
-#pragma warning(pop)
+#include "../tiny_obj_loader.h"
 
 #include "../Triangle.h"
 
@@ -13,7 +11,7 @@ namespace rt {
 
 class Mesh {
 public:
-    explicit Mesh(const aiMesh* mesh);
+    Mesh(const tinyobj::attrib_t& attrib, const tinyobj::shape_t& shape);
 
 private:
     std::vector<Triangle> m_Triangles;
