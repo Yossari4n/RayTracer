@@ -4,21 +4,21 @@
 namespace rt {
 
 Mesh::Mesh(const tinyobj::attrib_t& attrib, const tinyobj::shape_t& shape) {
-    const size_t size = shape.mesh.num_face_vertices.size();
+    for(size_t i = 0; i < shape.mesh.indices.size(); i += 3) {
+        const auto idx1 = shape.mesh.indices[i];
+        tinyobj::real_t x1 = attrib.vertices[3 * size_t(idx1.vertex_index) + 0];
+        tinyobj::real_t y1 = attrib.vertices[3 * size_t(idx1.vertex_index) + 1];
+        tinyobj::real_t z1 = attrib.vertices[3 * size_t(idx1.vertex_index) + 2];
 
-    for(size_t j = 0; j < size; j++) {
-        tinyobj::index_t idx = shape.mesh.indices[j];
-        tinyobj::real_t x1 = attrib.vertices[3 * size_t(idx.vertex_index) + 0];
-        tinyobj::real_t y1 = attrib.vertices[3 * size_t(idx.vertex_index) + 1];
-        tinyobj::real_t z1 = attrib.vertices[3 * size_t(idx.vertex_index) + 2];
+        const auto idx2 = shape.mesh.indices[i + 1];
+        tinyobj::real_t x2 = attrib.vertices[3 * size_t(idx2.vertex_index) + 0];
+        tinyobj::real_t y2 = attrib.vertices[3 * size_t(idx2.vertex_index) + 1];
+        tinyobj::real_t z2 = attrib.vertices[3 * size_t(idx2.vertex_index) + 2];
 
-        tinyobj::real_t x2 = attrib.vertices[3 * size_t(idx.vertex_index) + 3];
-        tinyobj::real_t y2 = attrib.vertices[3 * size_t(idx.vertex_index) + 4];
-        tinyobj::real_t z2 = attrib.vertices[3 * size_t(idx.vertex_index) + 5];
-
-        tinyobj::real_t x3 = attrib.vertices[3 * size_t(idx.vertex_index) + 6];
-        tinyobj::real_t y3 = attrib.vertices[3 * size_t(idx.vertex_index) + 7];
-        tinyobj::real_t z3 = attrib.vertices[3 * size_t(idx.vertex_index) + 8];
+        const auto idx3 = shape.mesh.indices[i + 2];
+        tinyobj::real_t x3 = attrib.vertices[3 * size_t(idx3.vertex_index) + 0];
+        tinyobj::real_t y3 = attrib.vertices[3 * size_t(idx3.vertex_index) + 1];
+        tinyobj::real_t z3 = attrib.vertices[3 * size_t(idx3.vertex_index) + 2];
 
         m_Triangles.emplace_back(
             Point3(x1, y1, z1),
@@ -26,6 +26,29 @@ Mesh::Mesh(const tinyobj::attrib_t& attrib, const tinyobj::shape_t& shape) {
             Point3(x3, y3, z3)
         );
     }
+
+    void;
+}
+
+bool Mesh::RayTrace(const Ray& ray, float minTime, float maxTime, RayTraceResult& result) const {
+    Triangle::HitResult closestHit{};
+    closestHit.m_Time = maxTime;
+
+    bool hitted = false;
+    for(const auto& triangle : m_Triangles) {
+        if(triangle.Hit(ray, minTime, closestHit.m_Time, closestHit)) {
+            hitted = true;
+        }
+    }
+
+    if(!hitted) {
+        return false;
+    }
+
+    result.m_Time = closestHit.m_Time;
+    result.m_Attenuation = Color(1.0f, 0.0f, 0.0f);
+
+    return true;
 }
 
 }
