@@ -14,12 +14,12 @@ public:
     Scene(IRayGenerator* ray_generator, ISpacePartitioner* space_partitioner, IRenderTarget* render_target);
 
     void LoadScene(const std::string& path);
-    void GenerateFrame(unsigned int samples_per_pixel, unsigned int max_depth) const;
+    void GenerateFrame(unsigned int samplesPerPpixel, unsigned int maxDepth) const;
 
 protected:
-    IRayGenerator* m_RayGenerator;
-    ISpacePartitioner* m_SpacePartitioner;
-    IRenderTarget* m_RenderTarget;
+    IRayGenerator* m_rayGenerator;
+    ISpacePartitioner* m_spacePartitioner;
+    IRenderTarget* m_renderTarget;
 };
 
 }

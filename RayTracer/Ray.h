@@ -16,8 +16,8 @@ public:
     Vector3 Direction() const;
 
 private:
-    Point3 m_Origin{0.0f};
-    Vector3 m_Direction{0.0f};
+    Point3 m_origin{0.0f};
+    Vector3 m_direction{0.0f};
 };
 
 }

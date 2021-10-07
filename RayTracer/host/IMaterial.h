@@ -10,15 +10,15 @@ namespace rt {
 
 class IMaterial {
 public:
-    struct ScatterResult {
+    struct ScatterRecord {
         Ray m_Scattered;
         Color m_Attenuation;
     };
 
     virtual ~IMaterial() = default;
 
-    virtual bool Scatter(const Ray& ray, const Triangle::HitResult& record, ScatterResult& result) const = 0;
-    virtual Color Emit(const Triangle::HitResult& record) const = 0;
+    virtual bool Scatter(const Ray& ray, const Triangle::HitRecord& record, ScatterRecord& result) const = 0;
+    virtual Color Emit(const Triangle::HitRecord& record) const = 0;
 };
 
 }

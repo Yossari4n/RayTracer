@@ -12,13 +12,18 @@ set(
 	"Ray.cpp"
 	"Triangle.h"
 	"Triangle.cpp"
+	"Camera.h"
+	"Camera.cpp"
+	"Lambertian.h"
+	"Lambertian.cpp"
+	"DiffuseLight.h"
+	"DiffuseLight.cpp"
+	"Debug.h"
 	"tiny_obj_loader.h"
 
 	"host/Scene.h"
 	"host/Scene.cpp"
 	"host/IRayGenerator.h"
-	"host/Camera.h"
-	"host/Camera.cpp"
 	"host/ISpacePartitioner.h"
 	"host/BruteForce.h"
 	"host/BruteForce.cpp"
@@ -28,10 +33,6 @@ set(
 	"host/Mesh.h"
 	"host/Mesh.cpp"
 	"host/IMaterial.h"
-	"host/Lambertian.h"
-	"host/Lambertian.cpp"
-	"host/DiffuseLight.h"
-	"host/DiffuseLight.cpp"
 )
 
 add_library(

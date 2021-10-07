@@ -1,7 +1,9 @@
 #ifndef Mesh_h
 #define Mesh_h
 
+#pragma warning(push, 0)
 #include "../tiny_obj_loader.h"
+#pragma warning(pop)
 
 #include "../Color.h"
 #include "../Ray.h"
@@ -25,7 +27,7 @@ public:
     bool RayTrace(const Ray& ray, float minTime, float maxTime, RayTraceResult& result) const;
 
 private:
-    std::vector<Triangle> m_Triangles;
+    std::vector<Triangle> m_triangles;
 };
 
 }

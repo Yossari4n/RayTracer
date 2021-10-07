@@ -1,5 +1,6 @@
+#include <RayTracer/Camera.h>
+
 #include <RayTracer/host/Scene.h>
-#include <RayTracer/host/Camera.h>
 #include <RayTracer/host/BruteForce.h>
 #include <RayTracer/host/PPMTarget.h>
 
@@ -15,10 +16,10 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    std::string path = argv[1];
+    const std::string path = argv[1];
 
     rt::Camera camera(
-        rt::Point3(-15.0f, 0.0f, 0.0f),   // look from
+        rt::Point3(0.0f, 0.0f, 15.0f),      // look from
         rt::Point3(0.0f, 0.0f, 0.0f),       // look at
         rt::Vector3(0.0f, 1.0f, 0.0f),      // up
         20.0f,                              // vfov

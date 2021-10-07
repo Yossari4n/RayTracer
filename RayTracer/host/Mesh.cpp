@@ -1,4 +1,5 @@
 #include "Mesh.h"
+
 #include <iostream>
 
 namespace rt {
@@ -20,23 +21,21 @@ Mesh::Mesh(const tinyobj::attrib_t& attrib, const tinyobj::shape_t& shape) {
         tinyobj::real_t y3 = attrib.vertices[3 * size_t(idx3.vertex_index) + 1];
         tinyobj::real_t z3 = attrib.vertices[3 * size_t(idx3.vertex_index) + 2];
 
-        m_Triangles.emplace_back(
+        m_triangles.emplace_back(
             Point3(x1, y1, z1),
             Point3(x2, y2, z2),
             Point3(x3, y3, z3)
         );
     }
-
-    void;
 }
 
 bool Mesh::RayTrace(const Ray& ray, float minTime, float maxTime, RayTraceResult& result) const {
-    Triangle::HitResult closestHit{};
-    closestHit.m_Time = maxTime;
+    Triangle::HitRecord closestHit{};
+    closestHit.m_time = maxTime;
 
     bool hitted = false;
-    for(const auto& triangle : m_Triangles) {
-        if(triangle.Hit(ray, minTime, closestHit.m_Time, closestHit)) {
+    for(const auto& triangle : m_triangles) {
+        if(triangle.Hit(ray, minTime, closestHit.m_time, closestHit)) {
             hitted = true;
         }
     }
@@ -45,7 +44,7 @@ bool Mesh::RayTrace(const Ray& ray, float minTime, float maxTime, RayTraceResult
         return false;
     }
 
-    result.m_Time = closestHit.m_Time;
+    result.m_Time = closestHit.m_time;
     result.m_Attenuation = Color(1.0f, 0.0f, 0.0f);
 
     return true;

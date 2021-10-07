@@ -11,7 +11,7 @@ public:
     Color Traverse(const Ray& ray, unsigned int depth, const Color& missColor = Color(0.0f)) const override;
 
 private:
-    std::vector<Mesh> m_RayTracables;
+    std::vector<Mesh> m_rayTracables;
 };
 
 }
