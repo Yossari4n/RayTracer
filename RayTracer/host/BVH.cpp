@@ -85,9 +85,8 @@ Mesh::RayTraceResult BVH::FindClosestHit(const BVH::Node& node, const Ray& ray, 
     }
 
     if(node.m_left) {
-        maxTime = result != Mesh::RayTraceResult::Missed ? record.m_time : maxTime;
-        if(auto rightResult = FindClosestHit(*node.m_left, ray, minTime, maxTime, record); rightResult != Mesh::RayTraceResult::Missed) {
-            result = rightResult;
+        if(auto leftResult = FindClosestHit(*node.m_left, ray, minTime, record.m_time, record); leftResult != Mesh::RayTraceResult::Missed) {
+            result = leftResult;
         }
     }
 

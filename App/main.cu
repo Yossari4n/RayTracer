@@ -3,6 +3,7 @@
 #include <RayTracer/host/Scene.h>
 #include <RayTracer/host/BruteForce.h>
 #include <RayTracer/host/BVH.h>
+#include <RayTracer/host/KDTree.h>
 #include <RayTracer/host/PPMTarget.h>
 #include <RayTracer/DebugMaterial.h>
 
@@ -31,11 +32,12 @@ int main(int argc, char* argv[]) {
     );
     rt::BruteForce bf;
     rt::BVH bvh;
+    rt::KDTree kdTree;
     rt::PPMTarget target(800, 600);
-    rt::Scene scene(&camera, &bf, &target);
+    rt::Scene scene(&camera, &kdTree, &target);
 
     scene.LoadScene(path);
-    scene.GenerateFrame(50, 50);
+    scene.GenerateFrame(25, 50);
 
     return 0;
 }

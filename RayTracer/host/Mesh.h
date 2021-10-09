@@ -13,6 +13,7 @@
 
 #include <vector>
 #include <memory>
+#include <optional>
 
 namespace rt {
 
@@ -24,6 +25,12 @@ public:
         Emitted
     };
 
+    enum class SplitAxis {
+        X,
+        Y,
+        Z
+    };
+
     struct RayTraceRecord {
         Ray m_scattered;
         Color m_attenuation;
@@ -32,6 +39,7 @@ public:
     };
 
     Mesh(const tinyobj::attrib_t& attrib, const tinyobj::shape_t& shape, const tinyobj::material_t& materials);
+    Mesh(const std::vector<Triangle>& triangles, std::unique_ptr<IMaterial> material);
 
     Mesh() = delete;
     Mesh(const Mesh& other);
@@ -40,6 +48,7 @@ public:
     Mesh& operator=(Mesh&& other) = default;
 
     RayTraceResult RayTrace(const Ray& ray, float minTime, float maxTime, RayTraceRecord& result) const;
+    std::pair<std::optional<Mesh>, std::optional<Mesh>> Split(const Point3& splitPoint, SplitAxis axis) const;
 
     AABB Volume() const;
 

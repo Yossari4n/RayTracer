@@ -48,6 +48,20 @@ Mesh::Mesh(const tinyobj::attrib_t& attrib, const tinyobj::shape_t& shape, const
     }
 }
 
+Mesh::Mesh(const std::vector<Triangle>& triangles, std::unique_ptr<IMaterial> material) 
+    : m_triangles(triangles)
+    , m_material(std::move(material))
+{
+    Point3 min(FLT_MAX);
+    Point3 max(FLT_MIN);
+    for(const auto& triangle : m_triangles) {
+        min = glm::min(min, glm::min(triangle.V0(), glm::min(triangle.V1(), triangle.V2())));
+        max = glm::max(max, glm::max(triangle.V0(), glm::max(triangle.V1(), triangle.V2())));
+    }
+
+    m_volume = AABB(min, max);
+}
+
 Mesh::Mesh(const Mesh& other) 
     : m_volume(other.m_volume)
     , m_triangles(other.m_triangles)
@@ -87,6 +101,27 @@ Mesh::RayTraceResult Mesh::RayTrace(const Ray& ray, float minTime, float maxTime
     }
 
     return RayTraceResult::Emitted;
+}
+
+std::pair<std::optional<Mesh>, std::optional<Mesh>> Mesh::Split(const Point3& splitPoint, SplitAxis axis) const {
+    std::vector<Triangle> furthers;
+    std::vector<Triangle> closers;
+
+    const glm::length_t splitAxisIndex = static_cast<glm::length_t>(axis);
+    for(const auto& triangle : m_triangles) {
+        const Point3 midPoint = triangle.MidPoint();
+
+        if(midPoint[splitAxisIndex] < splitPoint[splitAxisIndex]) {
+            furthers.push_back(triangle);
+        } else {
+            closers.push_back(triangle);
+        }
+    }
+
+    std::optional<Mesh> further = furthers.empty() ? std::nullopt : std::make_optional<Mesh>(furthers, std::move(m_material->Clone()));
+    std::optional<Mesh> closer = closers.empty() ? std::nullopt : std::make_optional<Mesh>(closers, std::move(m_material->Clone()));
+
+    return std::make_pair(closer, further);
 }
 
 AABB Mesh::Volume() const {

@@ -33,6 +33,8 @@ set(
 	"host/BruteForce.cpp"
 	"host/BVH.h"
 	"host/BVH.cpp"
+	"host/KDTree.h"
+	"host/KDTree.cpp"
 	"host/IRenderTarget.h"
 	"host/PPMTarget.h"
 	"host/PPMTarget.cpp"
