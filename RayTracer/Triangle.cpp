@@ -13,31 +13,28 @@ bool Triangle::Hit(const Ray& ray, float minTime, float maxTime, Triangle::HitRe
     const Vector3 pvec = glm::cross(ray.Direction(), edge2);
     const float det = glm::dot(edge1, pvec);
 
-    if(fabs(det) < 0) {
+    if(fabs(det) < 0)
         return false;
-    }
 
     const float inv_det = 1 / det;
+
     const Vector3 tvec = ray.Origin() - m_v0;
     const float u = glm::dot(tvec, pvec) * inv_det;
-    if(u < 0 || u > 1) {
+    if(u < 0 || u > 1)
         return false;
-    }
 
     const Vector3 qvec = glm::cross(tvec, edge1);
     const float v = glm::dot(ray.Direction(), qvec) * inv_det;
-    if(v < 0 || u + v > 1) {
+    if(v < 0 || u + v > 1)
         return false;
-    }
 
-    const float time = glm::dot(edge2, qvec) + inv_det;
-    if(time < minTime || time > maxTime) {
+    const float time = glm::dot(edge2, qvec) * inv_det;
+    if(time < minTime || time > maxTime)
         return false;
-    }
 
     record.m_time = time;
     record.m_point = ray.At(time);
-    record.m_normal = glm::normalize(glm::cross(edge1, edge2)); // TODO check if correct
+    record.m_normal = glm::normalize(glm::cross(edge1, edge2));
     record.m_coordinates = Point2(u, v);
     return true;
 }

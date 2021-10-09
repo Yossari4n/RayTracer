@@ -54,6 +54,7 @@ void Scene::LoadScene(const std::string& path) {
 void Scene::GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth) const {
     const int width = static_cast<int>(m_renderTarget->Width());
     const int height = static_cast<int>(m_renderTarget->Height());
+    const Color missColor(0.0f);
 
     for(int j = height - 1; j >= 0; j--) {
         LOG_INFO("Scanlines remaining: " << j << ' ' << std::flush);
@@ -67,7 +68,7 @@ void Scene::GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth) c
                 const float v = static_cast<float>(j + RandomFloat()) / (static_cast<float>(height) - 1);
 
                 const Ray& ray = m_rayGenerator->GenerateRay(u, v);
-                color += m_spacePartitioner->Traverse(ray, maxDepth, Color(0.0f));
+                color += m_spacePartitioner->Traverse(ray, maxDepth, missColor);
             }
 
             m_renderTarget->WriteColor(i, height - j - 1, color, samplesPerPixel);

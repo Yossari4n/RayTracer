@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
     rt::Scene scene(&camera, &bf, &target);
 
     scene.LoadScene(path);
-    scene.GenerateFrame(1, 1);
+    scene.GenerateFrame(50, 50);
 
     return 0;
 }
