@@ -9,6 +9,7 @@
 #include "../Color.h"
 #include "../Ray.h"
 #include "../Triangle.h"
+#include "../AABB.h"
 
 #include <vector>
 #include <memory>
@@ -40,7 +41,10 @@ public:
 
     RayTraceResult RayTrace(const Ray& ray, float minTime, float maxTime, RayTraceRecord& result) const;
 
+    AABB Volume() const;
+
 private:
+    AABB m_volume;
     std::vector<Triangle> m_triangles;
     std::unique_ptr<IMaterial> m_material;
 };

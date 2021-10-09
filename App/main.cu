@@ -2,6 +2,7 @@
 
 #include <RayTracer/host/Scene.h>
 #include <RayTracer/host/BruteForce.h>
+#include <RayTracer/host/BVH.h>
 #include <RayTracer/host/PPMTarget.h>
 #include <RayTracer/DebugMaterial.h>
 
@@ -29,6 +30,7 @@ int main(int argc, char* argv[]) {
         10.0f                               // focus_distance
     );
     rt::BruteForce bf;
+    rt::BVH bvh;
     rt::PPMTarget target(800, 600);
     rt::Scene scene(&camera, &bf, &target);
 

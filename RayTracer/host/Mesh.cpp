@@ -5,32 +5,39 @@
 #include "../DebugMaterial.h"
 
 #include <iostream>
+#include <algorithm>
 
 namespace rt {
 
 Mesh::Mesh(const tinyobj::attrib_t& attrib, const tinyobj::shape_t& shape, const tinyobj::material_t& material) {
+    Point3 min(FLT_MAX);
+    Point3 max(FLT_MIN);
     for(size_t i = 0; i < shape.mesh.indices.size(); i += 3) {
-        const auto idx1 = shape.mesh.indices[i];
-        tinyobj::real_t x1 = attrib.vertices[3 * size_t(idx1.vertex_index) + 0];
-        tinyobj::real_t y1 = attrib.vertices[3 * size_t(idx1.vertex_index) + 1];
-        tinyobj::real_t z1 = attrib.vertices[3 * size_t(idx1.vertex_index) + 2];
+        const tinyobj::index_t idx1 = shape.mesh.indices[i];
+        const tinyobj::real_t x1 = attrib.vertices[3 * size_t(idx1.vertex_index) + 0];
+        const tinyobj::real_t y1 = attrib.vertices[3 * size_t(idx1.vertex_index) + 1];
+        const tinyobj::real_t z1 = attrib.vertices[3 * size_t(idx1.vertex_index) + 2];
+        const Point3 p1(x1, y1, z1);
 
-        const auto idx2 = shape.mesh.indices[i + 1];
-        tinyobj::real_t x2 = attrib.vertices[3 * size_t(idx2.vertex_index) + 0];
-        tinyobj::real_t y2 = attrib.vertices[3 * size_t(idx2.vertex_index) + 1];
-        tinyobj::real_t z2 = attrib.vertices[3 * size_t(idx2.vertex_index) + 2];
+        const tinyobj::index_t idx2 = shape.mesh.indices[i + 1];
+        const tinyobj::real_t x2 = attrib.vertices[3 * size_t(idx2.vertex_index) + 0];
+        const tinyobj::real_t y2 = attrib.vertices[3 * size_t(idx2.vertex_index) + 1];
+        const tinyobj::real_t z2 = attrib.vertices[3 * size_t(idx2.vertex_index) + 2];
+        const Point3 p2(x2, y2, z2);
 
-        const auto idx3 = shape.mesh.indices[i + 2];
-        tinyobj::real_t x3 = attrib.vertices[3 * size_t(idx3.vertex_index) + 0];
-        tinyobj::real_t y3 = attrib.vertices[3 * size_t(idx3.vertex_index) + 1];
-        tinyobj::real_t z3 = attrib.vertices[3 * size_t(idx3.vertex_index) + 2];
+        const tinyobj::index_t idx3 = shape.mesh.indices[i + 2];
+        const tinyobj::real_t x3 = attrib.vertices[3 * size_t(idx3.vertex_index) + 0];
+        const tinyobj::real_t y3 = attrib.vertices[3 * size_t(idx3.vertex_index) + 1];
+        const tinyobj::real_t z3 = attrib.vertices[3 * size_t(idx3.vertex_index) + 2];
+        const Point3 p3(x3, y3, z3);
 
-        m_triangles.emplace_back(
-            Point3(x1, y1, z1),
-            Point3(x2, y2, z2),
-            Point3(x3, y3, z3)
-        );
+        min = glm::min(min, glm::min(p1, glm::min(p2, p3)));
+        max = glm::max(max, glm::max(p1, glm::max(p2, p3)));
+
+        m_triangles.emplace_back(p1, p2, p3);
     }
+
+    m_volume = AABB(min, max);
 
     if(material.name == "Light") {
         Color emmit(material.diffuse[0], material.diffuse[1], material.diffuse[2]);
@@ -42,11 +49,13 @@ Mesh::Mesh(const tinyobj::attrib_t& attrib, const tinyobj::shape_t& shape, const
 }
 
 Mesh::Mesh(const Mesh& other) 
-    : m_triangles(other.m_triangles)
+    : m_volume(other.m_volume)
+    , m_triangles(other.m_triangles)
     , m_material(other.m_material->Clone()) {}
 
 Mesh& Mesh::operator=(const Mesh& other)
 {
+    m_volume = other.m_volume;
     m_triangles = other.m_triangles;
     m_material = other.m_material->Clone();
 
@@ -78,6 +87,10 @@ Mesh::RayTraceResult Mesh::RayTrace(const Ray& ray, float minTime, float maxTime
     }
 
     return RayTraceResult::Emitted;
+}
+
+AABB Mesh::Volume() const {
+    return m_volume;
 }
 
 }

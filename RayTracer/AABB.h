@@ -8,6 +8,7 @@ namespace rt {
 
 class AABB {
 public:
+    AABB() = default;
     AABB(const Point3& min, const Point3& max);
     AABB(const AABB& lhs, const AABB& rhs);
 

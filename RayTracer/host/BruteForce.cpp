@@ -2,7 +2,7 @@
 
 namespace rt {
 
-void BruteForce::PartitionSpace(const std::vector<Mesh>& raytracables) {
+void BruteForce::PartitionSpace(const MeshList& raytracables) {
     m_rayTracables = raytracables;
 }
 

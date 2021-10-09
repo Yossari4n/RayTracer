@@ -9,13 +9,13 @@ namespace rt {
 
 class BruteForce : public ISpacePartitioner {
 public:
-    void PartitionSpace(const std::vector<Mesh>& raytracables) override;
+    void PartitionSpace(const MeshList& raytracables) override;
     Color Traverse(const Ray& ray, unsigned int depth, const Color& missColor = Color(0.0f)) const override;
 
 private:
     Mesh::RayTraceResult FindClosestHit(const Ray& ray, float minTime, float maxTime, Mesh::RayTraceRecord& record) const;
 
-    std::vector<Mesh> m_rayTracables;
+    MeshList m_rayTracables;
 };
 
 }

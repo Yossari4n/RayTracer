@@ -34,6 +34,16 @@ inline float RandomFloat(float min, float max) {
     return min + (max - min) * RandomFloat();
 }
 
+inline int RandomInt() {
+    static std::uniform_int_distribution<int> uni(0, 1);
+    static std::default_random_engine rng;
+    return uni(rng);
+}
+
+inline int RandomInt(int min, int max) {
+    return min + (max - min) * RandomInt();
+}
+
 inline Vector3 RandomInSphere() {
     while(true) {
         const Vector3 p = Vector3(RandomFloat(-1.0, 1.0), RandomFloat(-1.0, 1.0), RandomFloat(-1.0, 1.0));
