@@ -5,15 +5,19 @@ namespace rt {
 rt::Lambertian::Lambertian(const Color& albedo) 
     : m_albedo(albedo) {}
 
-bool Lambertian::Scatter(const Ray& ray, const Triangle::HitRecord& record, IMaterial::ScatterRecord& result) const {
-    Vector3 scatterDirection = record.m_normal + RandomUnit();
+std::unique_ptr<IMaterial> Lambertian::Clone() const {
+    return std::make_unique<Lambertian>(m_albedo);
+}
+
+bool Lambertian::Scatter(const Ray& ray, const Triangle::HitRecord& hitRecord, IMaterial::ScatterRecord& scatterRecord) const {
+    Vector3 scatterDirection = hitRecord.m_normal + RandomUnit();
 
     if(NearZero(scatterDirection)) {
-        scatterDirection = record.m_normal;
+        scatterDirection = hitRecord.m_normal;
     }
 
-    result.m_Scattered = Ray(record.m_point, scatterDirection);
-    result.m_Attenuation = m_albedo;
+    scatterRecord.m_scattered = Ray(hitRecord.m_point, scatterDirection);
+    scatterRecord.m_attenuation = m_albedo;
     return true;
 }
 

@@ -1,5 +1,7 @@
 #include "PPMTarget.h"
 
+#include "../Debug.h"
+
 #include <iostream>
 
 namespace rt {
@@ -21,6 +23,8 @@ void PPMTarget::WriteColor(size_t x, size_t y, const Color& color, unsigned int 
 }
 
 void PPMTarget::SaveBuffer() {
+    LOG_INFO("Saving buffer\n");
+
     std::cout << "P3\n" << m_Width << ' ' << m_Height << "\n255\n";
 
     const size_t size = m_Width * m_Height;

@@ -1,6 +1,6 @@
 # Blender v2.79 (sub 0) OBJ File: 'cornell-box-cycles.blend'
 # www.blender.org
-mtllib cornell-box.mtl
+mtllib cornell_box.mtl
 o area_light
 v -0.884011 5.319334 -2.517968
 v -0.884011 5.318497 -3.567968

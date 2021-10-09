@@ -10,8 +10,10 @@
 #include "Mesh.h"
 
 #include "../Debug.h"
+#include "../DebugMaterial.h"
 
 #include <iostream>
+#include <memory>
 
 namespace rt {
 
@@ -22,6 +24,7 @@ Scene::Scene(IRayGenerator* ray_generator, ISpacePartitioner* space_partitioner,
 
 void Scene::LoadScene(const std::string& path) {
     tinyobj::ObjReaderConfig config;
+    //config.mtl_search_path = "";
 
     tinyobj::ObjReader reader;
     if(!reader.ParseFromFile(path, config)) {
@@ -42,10 +45,10 @@ void Scene::LoadScene(const std::string& path) {
     std::vector<Mesh> meshes;
     meshes.reserve(shapes.size());
     for(const auto& shape : shapes) {
-        meshes.emplace_back(attrib, shape);
+        meshes.emplace_back(attrib, shape, materials[shape.mesh.material_ids[0]]);
     }
 
-    m_spacePartitioner->PartitionSpace(std::move(meshes));
+    m_spacePartitioner->PartitionSpace(meshes);
 }
 
 void Scene::GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth) const {
@@ -72,7 +75,6 @@ void Scene::GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth) c
     }
 
     LOG_INFO('\n');
-    LOG_INFO("Saving buffer\n");
     m_renderTarget->SaveBuffer();
 }
 

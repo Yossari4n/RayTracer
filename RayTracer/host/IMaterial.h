@@ -6,18 +6,22 @@
 #include "../Ray.h"
 #include "../Triangle.h"
 
+#include <memory>
+
 namespace rt {
 
 class IMaterial {
 public:
     struct ScatterRecord {
-        Ray m_Scattered;
-        Color m_Attenuation;
+        Ray m_scattered;
+        Color m_attenuation;
     };
 
     virtual ~IMaterial() = default;
 
-    virtual bool Scatter(const Ray& ray, const Triangle::HitRecord& record, ScatterRecord& result) const = 0;
+    virtual std::unique_ptr<IMaterial> Clone() const = 0;
+
+    virtual bool Scatter(const Ray& ray, const Triangle::HitRecord& hitRecord, ScatterRecord& scatterRecord) const = 0;
     virtual Color Emit(const Triangle::HitRecord& record) const = 0;
 };
 

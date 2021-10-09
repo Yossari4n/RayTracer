@@ -1,10 +1,14 @@
 #include "Mesh.h"
 
+#include "../DiffuseLight.h"
+#include "../Lambertian.h"
+#include "../DebugMaterial.h"
+
 #include <iostream>
 
 namespace rt {
 
-Mesh::Mesh(const tinyobj::attrib_t& attrib, const tinyobj::shape_t& shape) {
+Mesh::Mesh(const tinyobj::attrib_t& attrib, const tinyobj::shape_t& shape, const tinyobj::material_t& material) {
     for(size_t i = 0; i < shape.mesh.indices.size(); i += 3) {
         const auto idx1 = shape.mesh.indices[i];
         tinyobj::real_t x1 = attrib.vertices[3 * size_t(idx1.vertex_index) + 0];
@@ -27,9 +31,29 @@ Mesh::Mesh(const tinyobj::attrib_t& attrib, const tinyobj::shape_t& shape) {
             Point3(x3, y3, z3)
         );
     }
+
+    if(material.name == "Light") {
+        Color emmit(material.diffuse[0], material.diffuse[1], material.diffuse[2]);
+        m_material = std::make_unique<DiffuseLight>(emmit);
+    } else {
+        Color albedo(material.diffuse[0], material.diffuse[1], material.diffuse[2]);
+        m_material = std::make_unique<Lambertian>(albedo);
+    }
 }
 
-bool Mesh::RayTrace(const Ray& ray, float minTime, float maxTime, RayTraceResult& result) const {
+Mesh::Mesh(const Mesh& other) 
+    : m_triangles(other.m_triangles)
+    , m_material(other.m_material->Clone()) {}
+
+Mesh& Mesh::operator=(const Mesh& other)
+{
+    m_triangles = other.m_triangles;
+    m_material = other.m_material->Clone();
+
+    return *this;
+}
+
+Mesh::RayTraceResult Mesh::RayTrace(const Ray& ray, float minTime, float maxTime, RayTraceRecord& result) const {
     Triangle::HitRecord closestHit{};
     closestHit.m_time = maxTime;
 
@@ -41,13 +65,19 @@ bool Mesh::RayTrace(const Ray& ray, float minTime, float maxTime, RayTraceResult
     }
 
     if(!hitted) {
-        return false;
+        return RayTraceResult::Missed;
     }
 
-    result.m_Time = closestHit.m_time;
-    result.m_Attenuation = Color(1.0f, 0.0f, 0.0f);
+    result.m_time = closestHit.m_time;
+    result.m_emitted = m_material->Emit(closestHit);
 
-    return true;
+    if(IMaterial::ScatterRecord record{}; m_material->Scatter(ray, closestHit, record)) {
+        result.m_attenuation = record.m_attenuation;
+        result.m_scattered = record.m_scattered;
+        return RayTraceResult::Scattered;
+    }
+
+    return RayTraceResult::Emitted;
 }
 
 }

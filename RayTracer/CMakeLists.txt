@@ -18,6 +18,8 @@ set(
 	"Lambertian.cpp"
 	"DiffuseLight.h"
 	"DiffuseLight.cpp"
+	"DebugMaterial.h"
+	"DebugMaterial.cpp"
 	"Debug.h"
 	"tiny_obj_loader.h"
 

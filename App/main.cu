@@ -3,6 +3,7 @@
 #include <RayTracer/host/Scene.h>
 #include <RayTracer/host/BruteForce.h>
 #include <RayTracer/host/PPMTarget.h>
+#include <RayTracer/DebugMaterial.h>
 
 #define TINYOBJLOADER_IMPLEMENTATION 
 #include "../RayTracer/tiny_obj_loader.h"
@@ -19,8 +20,8 @@ int main(int argc, char* argv[]) {
     const std::string path = argv[1];
 
     rt::Camera camera(
-        rt::Point3(0.0f, 0.0f, 15.0f),      // look from
-        rt::Point3(0.0f, 0.0f, 0.0f),       // look at
+        rt::Point3(0.0f, 0.0f, 25.0f),       // look from
+        rt::Point3(0.0f, 2.0f, 0.0f),       // look at
         rt::Vector3(0.0f, 1.0f, 0.0f),      // up
         20.0f,                              // vfov
         16.0f / 9.0f,                       // aspect ratio
