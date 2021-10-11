@@ -11,10 +11,10 @@ class IRenderTarget;
 
 class Scene {
 public:
-    Scene(IRayGenerator* ray_generator, ISpacePartitioner* space_partitioner, IRenderTarget* render_target);
+    Scene(IRayGenerator* rayGenerator, ISpacePartitioner* spacePartitioner, IRenderTarget* renderTarget);
 
     void LoadScene(const std::string& path);
-    void GenerateFrame(unsigned int samplesPerPpixel, unsigned int maxDepth) const;
+    void GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth) const;
 
 protected:
     IRayGenerator* m_rayGenerator;

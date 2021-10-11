@@ -17,10 +17,10 @@
 
 namespace rt {
 
-Scene::Scene(IRayGenerator* ray_generator, ISpacePartitioner* space_partitioner, IRenderTarget* render_target)
-    : m_rayGenerator(ray_generator)
-    , m_spacePartitioner(space_partitioner)
-    , m_renderTarget(render_target) {}
+Scene::Scene(IRayGenerator* rayGenerator, ISpacePartitioner* spacePartitioner, IRenderTarget* renderTarget)
+    : m_rayGenerator(rayGenerator)
+    , m_spacePartitioner(spacePartitioner)
+    , m_renderTarget(renderTarget) {}
 
 void Scene::LoadScene(const std::string& path) {
     tinyobj::ObjReaderConfig config;

@@ -41,6 +41,9 @@ set(
 	"host/Mesh.h"
 	"host/Mesh.cpp"
 	"host/IMaterial.h"
+
+	"device/Scene.cuh"
+	"device/Scene.cu"
 )
 
 add_library(
