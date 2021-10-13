@@ -14,6 +14,7 @@
 #include <vector>
 #include <memory>
 #include <optional>
+#include <string>
 
 namespace rt {
 
@@ -39,7 +40,7 @@ public:
     };
 
     Mesh(const tinyobj::attrib_t& attrib, const tinyobj::shape_t& shape, const tinyobj::material_t& materials);
-    Mesh(const std::vector<Triangle>& triangles, std::unique_ptr<IMaterial> material);
+    Mesh(const std::vector<Triangle>& triangles, std::unique_ptr<IMaterial> material, const std::string& name);
 
     Mesh() = delete;
     Mesh(const Mesh& other);
@@ -56,6 +57,7 @@ private:
     AABB m_volume;
     std::vector<Triangle> m_triangles;
     std::unique_ptr<IMaterial> m_material;
+    std::string m_name;
 };
 
 }

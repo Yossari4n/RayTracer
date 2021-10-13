@@ -24,7 +24,6 @@ Scene::Scene(IRayGenerator* rayGenerator, ISpacePartitioner* spacePartitioner, I
 
 void Scene::LoadScene(const std::string& path) {
     tinyobj::ObjReaderConfig config;
-    //config.mtl_search_path = "";
 
     tinyobj::ObjReader reader;
     if(!reader.ParseFromFile(path, config)) {
@@ -64,8 +63,8 @@ void Scene::GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth) c
 
             // multisampling
             for(unsigned int s = 0; s < samplesPerPixel; s++) {
-                const float u = static_cast<float>(i + RandomFloat()) / (static_cast<float>(width) - 1);
-                const float v = static_cast<float>(j + RandomFloat()) / (static_cast<float>(height) - 1);
+                const float u = static_cast<float>(i + Random<float>()) / (static_cast<float>(width) - 1);
+                const float v = static_cast<float>(j + Random<float>()) / (static_cast<float>(height) - 1);
 
                 const Ray& ray = m_rayGenerator->GenerateRay(u, v);
                 color += m_spacePartitioner->Traverse(ray, maxDepth, missColor);

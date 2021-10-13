@@ -5,7 +5,7 @@ namespace rt {
 namespace {
 
 Mesh::SplitAxis RandomSplitAxis() {
-    switch(RandomInt(0, 3))
+    switch(Random(0, 3))
     {
     case 0:
         return Mesh::SplitAxis::X;
@@ -27,7 +27,7 @@ void KDTree::PartitionSpace(const MeshList& raytracables) {
 }
 
 Color KDTree::Traverse(const Ray& ray, unsigned int depth, const Color& missColor) const {
-    if(depth == 0) {
+    if(depth == 0 || m_root == nullptr) {
         return Color(0.0f);
     }
 
@@ -107,12 +107,13 @@ Mesh::RayTraceResult KDTree::FindClosestHit(const KDTree::Node& node, const Ray&
     }
 
     Mesh::RayTraceResult result = Mesh::RayTraceResult::Missed;
-    if(node.m_right) {
-        result = FindClosestHit(*node.m_right, ray, minTime, maxTime, record);
+    if(node.m_left) {
+        result = FindClosestHit(*node.m_left, ray, minTime, maxTime, record);
     }
 
-    if(node.m_left) {
-        if(auto leftResult = FindClosestHit(*node.m_left, ray, minTime, record.m_time, record); leftResult != Mesh::RayTraceResult::Missed) {
+    if(node.m_right) {
+        maxTime = result != Mesh::RayTraceResult::Missed ? record.m_time : maxTime;
+        if(auto leftResult = FindClosestHit(*node.m_right, ray, minTime, maxTime, record); leftResult != Mesh::RayTraceResult::Missed) {
             result = leftResult;
         }
     }

@@ -9,7 +9,8 @@
 
 namespace rt {
 
-Mesh::Mesh(const tinyobj::attrib_t& attrib, const tinyobj::shape_t& shape, const tinyobj::material_t& material) {
+Mesh::Mesh(const tinyobj::attrib_t& attrib, const tinyobj::shape_t& shape, const tinyobj::material_t& material)
+    : m_name(shape.name) {
     Point3 min(FLT_MAX);
     Point3 max(FLT_MIN);
     for(size_t i = 0; i < shape.mesh.indices.size(); i += 3) {
@@ -48,10 +49,10 @@ Mesh::Mesh(const tinyobj::attrib_t& attrib, const tinyobj::shape_t& shape, const
     }
 }
 
-Mesh::Mesh(const std::vector<Triangle>& triangles, std::unique_ptr<IMaterial> material) 
+Mesh::Mesh(const std::vector<Triangle>& triangles, std::unique_ptr<IMaterial> material, const std::string& name) 
     : m_triangles(triangles)
-    , m_material(std::move(material))
-{
+    , m_material(std::move(material)) 
+    , m_name(name) {
     Point3 min(FLT_MAX);
     Point3 max(FLT_MIN);
     for(const auto& triangle : m_triangles) {
@@ -65,13 +66,14 @@ Mesh::Mesh(const std::vector<Triangle>& triangles, std::unique_ptr<IMaterial> ma
 Mesh::Mesh(const Mesh& other) 
     : m_volume(other.m_volume)
     , m_triangles(other.m_triangles)
-    , m_material(other.m_material->Clone()) {}
+    , m_material(other.m_material->Clone())
+    , m_name(other.m_name) {}
 
-Mesh& Mesh::operator=(const Mesh& other)
-{
+Mesh& Mesh::operator=(const Mesh& other) {
     m_volume = other.m_volume;
     m_triangles = other.m_triangles;
     m_material = other.m_material->Clone();
+    m_name = other.m_name;
 
     return *this;
 }
@@ -118,8 +120,8 @@ std::pair<std::optional<Mesh>, std::optional<Mesh>> Mesh::Split(const Point3& sp
         }
     }
 
-    std::optional<Mesh> further = furthers.empty() ? std::nullopt : std::make_optional<Mesh>(furthers, std::move(m_material->Clone()));
-    std::optional<Mesh> closer = closers.empty() ? std::nullopt : std::make_optional<Mesh>(closers, std::move(m_material->Clone()));
+    std::optional<Mesh> further = furthers.empty() ? std::nullopt : std::make_optional<Mesh>(furthers, std::move(m_material->Clone()), m_name);
+    std::optional<Mesh> closer = closers.empty() ? std::nullopt : std::make_optional<Mesh>(closers, std::move(m_material->Clone()), m_name);
 
     return std::make_pair(closer, further);
 }

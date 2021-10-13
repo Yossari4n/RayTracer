@@ -15,7 +15,7 @@ void BVH::PartitionSpace(const MeshList& raytracables) {
 }
 
 Color BVH::Traverse(const Ray& ray, unsigned int depth, const Color& missColor) const {
-    if(depth == 0) {
+    if(depth == 0 || m_root == nullptr) {
         return Color(0.0f);
     }
 
@@ -44,7 +44,7 @@ void BVH::InnerParitionSpace(Node& curr, std::vector<const Mesh*>& raytracablePt
         curr.m_raytracable = std::make_unique<Mesh>(*raytracablePtrs[start]);
         curr.m_volume = curr.m_raytracable->Volume();
     } else {
-        switch(RandomInt(0, 2))
+        switch(Random(0, 2))
         {
         case 0:
             std::sort(raytracablePtrs.begin() + start, raytracablePtrs.begin() + end, AxisXComparator());
@@ -76,7 +76,8 @@ Mesh::RayTraceResult BVH::FindClosestHit(const BVH::Node& node, const Ray& ray, 
     }
 
     if(node.m_raytracable) {
-        return node.m_raytracable->RayTrace(ray, minTime, maxTime, record);
+        auto test = node.m_raytracable->RayTrace(ray, minTime, maxTime, record);
+        return test;
     }
 
     Mesh::RayTraceResult result = Mesh::RayTraceResult::Missed;
@@ -85,7 +86,8 @@ Mesh::RayTraceResult BVH::FindClosestHit(const BVH::Node& node, const Ray& ray, 
     }
 
     if(node.m_left) {
-        if(auto leftResult = FindClosestHit(*node.m_left, ray, minTime, record.m_time, record); leftResult != Mesh::RayTraceResult::Missed) {
+        maxTime = result != Mesh::RayTraceResult::Missed ? record.m_time : maxTime;
+        if(auto leftResult = FindClosestHit(*node.m_left, ray, minTime, maxTime, record); leftResult != Mesh::RayTraceResult::Missed) {
             result = leftResult;
         }
     }

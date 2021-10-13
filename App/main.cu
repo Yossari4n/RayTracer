@@ -1,7 +1,9 @@
+#pragma warning(push, 0)
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 #include "curand_kernel.h"
 #include <curand_kernel.h>
+#pragma warning(pop)
 
 #include <RayTracer/Camera.h>
 #include <RayTracer/DebugMaterial.h>
@@ -18,16 +20,22 @@
 #include <iostream>
 #include <string>
 
-int main(int argc, char* argv[]) {
-    if(argc != 2) {
-        std::cerr << "Wrong arguments\n";
-        return -1;
-    }
+#include <RayTracer/AABB.h>
+#include <RayTracer/Color.h>
+#include <RayTracer/Math.h>
+#include <RayTracer/Ray.h>
+#include <RayTracer/Triangle.h>
+__global__ void Kernel() {
+    rt::Point3 p1(1.0f);
+    rt::Vector3 v1(1.0f);
+    rt::AABB v(p1, p1);
+}
 
+int main(int argc, char* argv[]) {
     const std::string path = argv[1];
 
     rt::Camera camera(
-        rt::Point3(0.0f, 0.0f, 25.0f),      // look from
+        rt::Point3(0.0f, 0.0f, 25.0f),       // look from
         rt::Point3(0.0f, 2.0f, 0.0f),       // look at
         rt::Vector3(0.0f, 1.0f, 0.0f),      // up
         20.0f,                              // vfov
@@ -35,10 +43,14 @@ int main(int argc, char* argv[]) {
         0.1f,                               // aperture
         10.0f                               // focus_distance
     );
-    rt::device::Scene scene(nullptr, nullptr, nullptr);
+    rt::BruteForce bf;
+    rt::BVH bvh;
+    rt::KDTree kdTree;
+    rt::PPMTarget target(400, 300);
+    rt::Scene scene(&camera, &bf, &target);
 
     scene.LoadScene(path);
-    scene.GenerateFrame(25, 50);
+    scene.GenerateFrame(25, 10);
 
     return 0;
 }
