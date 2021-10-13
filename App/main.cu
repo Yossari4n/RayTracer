@@ -20,17 +20,6 @@
 #include <iostream>
 #include <string>
 
-#include <RayTracer/AABB.h>
-#include <RayTracer/Color.h>
-#include <RayTracer/Math.h>
-#include <RayTracer/Ray.h>
-#include <RayTracer/Triangle.h>
-__global__ void Kernel() {
-    rt::Point3 p1(1.0f);
-    rt::Vector3 v1(1.0f);
-    rt::AABB v(p1, p1);
-}
-
 int main(int argc, char* argv[]) {
     const std::string path = argv[1];
 

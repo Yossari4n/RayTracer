@@ -1,10 +1,12 @@
 #ifndef Scene_cuh
 #define Scene_cuh
 
+#pragma warning(push, 0)
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 #include "curand_kernel.h"
 #include <curand_kernel.h>
+#pragma warning(pop)
 
 #include <string>
 

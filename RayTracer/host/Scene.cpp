@@ -7,10 +7,9 @@
 #include "IRayGenerator.h"
 #include "ISpacePartitioner.h"
 #include "IRenderTarget.h"
-#include "Mesh.h"
 
+#include "../Mesh.h"
 #include "../Debug.h"
-#include "../DebugMaterial.h"
 
 #include <iostream>
 #include <memory>

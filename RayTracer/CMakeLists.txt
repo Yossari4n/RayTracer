@@ -15,6 +15,7 @@ set(
 	"Lambertian.h"
 	"DiffuseLight.h"
 	"DebugMaterial.h"
+	"Mesh.h"
 	"Debug.h"
 	"tiny_obj_loader.h"
 
@@ -31,12 +32,14 @@ set(
 	"host/IRenderTarget.h"
 	"host/PPMTarget.h"
 	"host/PPMTarget.cpp"
-	"host/Mesh.h"
-	"host/Mesh.cpp"
 	"host/IMaterial.h"
 
+	"device/IDeviceResource.cuh"
 	"device/Scene.cuh"
 	"device/Scene.cu"
+	"device/IRayGenerator.cuh"
+	"device/ISpacePartitioner.cuh"
+	"device/IRenderTarget.cuh"
 )
 
 add_library(
