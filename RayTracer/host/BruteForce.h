@@ -1,13 +1,13 @@
 #ifndef BruteForce_h
 #define BruteForce_h
 
-#include "ISpacePartitioner.h"
+#include "IAccelerationStructure.h"
 
 #include <optional>
 
 namespace rt {
 
-class BruteForce : public ISpacePartitioner {
+class BruteForce : public IAccelerationStructure {
 public:
     void PartitionSpace(const MeshList& raytracables) override;
     Color Traverse(const Ray& ray, unsigned int depth, const Color& missColor = Color(0.0f)) const override;

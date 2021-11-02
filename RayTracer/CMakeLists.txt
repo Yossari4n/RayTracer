@@ -23,7 +23,7 @@ set(
 	"host/IRayGenerator.h"
 	"host/Camera.h"
 	"host/Camera.cpp"
-	"host/ISpacePartitioner.h"
+	"host/IAccelerationStructure.h"
 	"host/BruteForce.h"
 	"host/BruteForce.cpp"
 	"host/BVH.h"
@@ -42,7 +42,7 @@ set(
 	"device/IRayGenerator.cuh"
 	"device/Camera.cuh"
 	"device/IRenderTarget.cuh"
-	"device/ISpacePartitioner.cuh"
+	"device/IAccelerationStructure.cuh"
 )
 
 add_library(

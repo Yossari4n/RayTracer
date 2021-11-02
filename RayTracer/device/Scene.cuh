@@ -10,11 +10,9 @@
 
 #include "IRayGenerator.cuh"
 #include "IRenderTarget.cuh"
-#include "ISpacePartitioner.cuh"
+#include "IAccelerationStructure.cuh"
 #include "../Debug.h"
 #include "../Mesh.h"
-
-#include <string>
 
 namespace rt {
 
@@ -32,7 +30,7 @@ __global__ void InitCurandState(unsigned int maxX, unsigned int maxY, curandStat
     curand_init(1984U + pixelIndex, 0U, 0U, &randState[pixelIndex]);
 }
 
-__global__ void GenerateFrameKernel(unsigned int samplesPerPixel, unsigned int maxDepth, Color missColor, IRayGenerator::DevicePtr d_rayGenerator, ISpacePartitioner::DevicePtr d_partitioner, IRenderTarget::DevicePtr d_target, curandState* randState) {
+__global__ void GenerateFrameKernel(unsigned int samplesPerPixel, unsigned int maxDepth, Color missColor, IRayGenerator::DevicePtr d_rayGenerator, IAccelerationStructure::DevicePtr d_partitioner, IRenderTarget::DevicePtr d_target, curandState* randState) {
     const unsigned int maxX = 1;//static_cast<unsigned int>((*d_target)->Width());
     const unsigned int maxY = 1;//static_cast<unsigned int>((*d_target)->Height());
 
@@ -59,7 +57,7 @@ __global__ void GenerateFrameKernel(unsigned int samplesPerPixel, unsigned int m
 
 class Scene {
 public:
-    __host__ Scene(IRayGenerator* rayGenerator, ISpacePartitioner* spacePartitioner, IRenderTarget* renderTarget) 
+    __host__ Scene(IRayGenerator* rayGenerator, IAccelerationStructure* spacePartitioner, IRenderTarget* renderTarget)
         : m_rayGenerator(rayGenerator)
         , m_spacePartitioner(spacePartitioner)
         , m_renderTarget(renderTarget) {}
@@ -78,18 +76,18 @@ public:
         // Init CUDA random
         curandState* state = nullptr;
         CHECK_CUDA(cudaMalloc((void**)&state, width * height * sizeof(curandState)));
-        InitCurandState << <blocks, threads >> > (width, height, state);
+        InitCurandState<<<blocks, threads>>>(width, height, state);
         CHECK_CUDA(cudaGetLastError());
         CHECK_CUDA(cudaDeviceSynchronize());
 
-        GenerateFrameKernel << <blocks, threads >> > (samplesPerPixel, maxDepth, missColor, m_rayGenerator->ToDevice(), nullptr, nullptr, state);
+        GenerateFrameKernel<<<blocks, threads>>>(samplesPerPixel, maxDepth, missColor, m_rayGenerator->ToDevice(), nullptr, nullptr, state);
         CHECK_CUDA(cudaGetLastError());
         CHECK_CUDA(cudaDeviceSynchronize());
     }
 
 private:
     IRayGenerator* m_rayGenerator;
-    ISpacePartitioner* m_spacePartitioner;
+    IAccelerationStructure* m_spacePartitioner;
     IRenderTarget* m_renderTarget;
 };
 

@@ -1,11 +1,11 @@
 #ifndef KDTree_h
 #define KDTree_h
 
-#include "ISpacePartitioner.h"
+#include "IAccelerationStructure.h"
 
 namespace rt {
 
-class KDTree : public ISpacePartitioner {
+class KDTree : public IAccelerationStructure {
     struct Node {
         MeshList m_raytracables;
         AABB m_volume;

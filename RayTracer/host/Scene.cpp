@@ -4,9 +4,6 @@
 #include "../tiny_obj_loader.h"
 #pragma warning(pop)
 
-#include "IRayGenerator.h"
-#include "ISpacePartitioner.h"
-#include "IRenderTarget.h"
 #include "../Mesh.h"
 #include "../Debug.h"
 
@@ -15,7 +12,7 @@
 
 namespace rt {
 
-Scene::Scene(IRayGenerator* rayGenerator, ISpacePartitioner* spacePartitioner, IRenderTarget* renderTarget)
+Scene::Scene(IRayGenerator* rayGenerator, IAccelerationStructure* spacePartitioner, IRenderTarget* renderTarget)
     : m_rayGenerator(rayGenerator)
     , m_spacePartitioner(spacePartitioner)
     , m_renderTarget(renderTarget) {}

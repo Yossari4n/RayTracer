@@ -1,13 +1,13 @@
 #ifndef BVH_h
 #define BHV_h
 
-#include "ISpacePartitioner.h"
+#include "IAccelerationStructure.h"
 
 #include "../AABB.h"
 
 namespace rt {
 
-class BVH : public ISpacePartitioner {
+class BVH : public IAccelerationStructure {
     struct Node {
         std::unique_ptr<Mesh> m_raytracable;
 

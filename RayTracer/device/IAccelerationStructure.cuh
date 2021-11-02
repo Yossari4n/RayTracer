@@ -1,5 +1,5 @@
-#ifndef ISpacePartitioner_cuh
-#define ISpacePartitioner_cuh
+#ifndef IAccelerationStructure_cuh
+#define IAccelerationStructure_cuh
 
 #pragma warning(push, 0)
 #include "cuda_runtime.h"
@@ -13,16 +13,16 @@
 
 namespace rt::device {
 
-class ISpacePartitioner {
+class IAccelerationStructure {
 public:
     class IDevice {
     public:
         __device__ virtual Color Traverse(const Ray& ray, unsigned int depth, const Color& missColor, curandState* randState) const = 0;
     };
-    using DevicePtr = ISpacePartitioner::IDevice**;
+    using DevicePtr = IAccelerationStructure::IDevice**;
     using MeshList = std::vector<Mesh>;
 
-    virtual ~ISpacePartitioner() = default;
+    virtual ~IAccelerationStructure() = default;
 
     virtual void PartitionSpace(const MeshList& raytracables) = 0;
 
