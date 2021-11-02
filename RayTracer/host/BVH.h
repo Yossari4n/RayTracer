@@ -36,11 +36,11 @@ class BVH : public IAccelerationStructure {
 
 public:
     void PartitionSpace(const MeshList& raytracables) override;
-    Color Traverse(const Ray& ray, unsigned int depth, const Color& missColor = Color(0.0f)) const override;
 
 private:
     void InnerParitionSpace(Node& curr, std::vector<const Mesh*>& raytracablePtrs, size_t start, size_t end);
-    Mesh::RayTraceResult FindClosestHit(const BVH::Node& node, const Ray& ray, float minTime, float maxTime, Mesh::RayTraceRecord& record) const;
+    Mesh::RayTraceResult FindClosestHit(const Ray& ray, float minTime, float maxTime, Mesh::RayTraceRecord& record) const override;
+    Mesh::RayTraceResult InnerFindClosestHit(const BVH::Node& node, const Ray& ray, float minTime, float maxTime, Mesh::RayTraceRecord& record) const;
 
     std::unique_ptr<Node> m_root;
 };

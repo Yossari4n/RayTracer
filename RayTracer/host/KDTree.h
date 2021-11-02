@@ -16,11 +16,11 @@ class KDTree : public IAccelerationStructure {
 
 public:
     void PartitionSpace(const MeshList& raytracables) override;
-    Color Traverse(const Ray& ray, unsigned int depth, const Color& missColor = Color(0.0f)) const override;
 
 private:
     void InnerPartitionSpace(Node& curr, const std::vector<Mesh>& raytracables, int depth);
-    Mesh::RayTraceResult FindClosestHit(const KDTree::Node& node, const Ray& ray, float minTime, float maxTime, Mesh::RayTraceRecord& record) const;
+    Mesh::RayTraceResult FindClosestHit(const Ray& ray, float minTime, float maxTime, Mesh::RayTraceRecord& record) const override;
+    Mesh::RayTraceResult InnerFindClosestHit(const KDTree::Node& node, const Ray& ray, float minTime, float maxTime, Mesh::RayTraceRecord& record) const;
 
     std::unique_ptr<Node> m_root;
 };

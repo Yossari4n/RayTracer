@@ -5,7 +5,7 @@ namespace rt {
 PPMTarget::PPMTarget(size_t width, size_t height)
     : m_width(width)
     , m_height(height) {
-    m_FrameBuffer.reserve(m_width * m_height);
+    m_FrameBuffer.resize(m_width * m_height);
 }
 
 void PPMTarget::WriteColor(size_t x, size_t y, const Color& color, unsigned int samplesPerPixel) {

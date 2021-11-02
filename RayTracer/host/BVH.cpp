@@ -14,30 +14,6 @@ void BVH::PartitionSpace(const MeshList& raytracables) {
     InnerParitionSpace(*m_root, raytracablePtrs, 0, raytracablePtrs.size());
 }
 
-Color BVH::Traverse(const Ray& ray, unsigned int depth, const Color& missColor) const {
-    if(depth == 0 || m_root == nullptr) {
-        return Color(0.0f);
-    }
-
-    Mesh::RayTraceRecord record{};
-    const Mesh::RayTraceResult result = FindClosestHit(*m_root, ray, 0.001f, FLT_MAX, record);
-    switch(result)
-    {
-    case Mesh::RayTraceResult::Scattered:
-        return record.m_emitted + record.m_attenuation * Traverse(record.m_scattered, depth - 1, missColor);
-        break;
-
-    case Mesh::RayTraceResult::Emitted:
-        return record.m_emitted;
-        break;
-
-    case Mesh::RayTraceResult::Missed:
-    default:
-        return missColor;
-        break;
-    }
-}
-
 void BVH::InnerParitionSpace(Node& curr, std::vector<const Mesh*>& raytracablePtrs, size_t start, size_t end) {
     const size_t span = end - start;
     if(span == 1) {
@@ -70,7 +46,11 @@ void BVH::InnerParitionSpace(Node& curr, std::vector<const Mesh*>& raytracablePt
     }
 }
 
-Mesh::RayTraceResult BVH::FindClosestHit(const BVH::Node& node, const Ray& ray, float minTime, float maxTime, Mesh::RayTraceRecord& record) const {
+Mesh::RayTraceResult BVH::FindClosestHit(const Ray& ray, float minTime, float maxTime, Mesh::RayTraceRecord& record) const {
+    return InnerFindClosestHit(*m_root, ray, minTime, maxTime, record);
+}
+
+Mesh::RayTraceResult BVH::InnerFindClosestHit(const BVH::Node& node, const Ray& ray, float minTime, float maxTime, Mesh::RayTraceRecord& record) const {
     if(!node.m_volume.Hit(ray, minTime, maxTime)) {
         return Mesh::RayTraceResult::Missed;
     }
@@ -82,12 +62,12 @@ Mesh::RayTraceResult BVH::FindClosestHit(const BVH::Node& node, const Ray& ray, 
 
     Mesh::RayTraceResult result = Mesh::RayTraceResult::Missed;
     if(node.m_right) {
-        result = FindClosestHit(*node.m_right, ray, minTime, maxTime, record);
+        result = InnerFindClosestHit(*node.m_right, ray, minTime, maxTime, record);
     }
 
     if(node.m_left) {
         maxTime = result != Mesh::RayTraceResult::Missed ? record.m_time : maxTime;
-        if(auto leftResult = FindClosestHit(*node.m_left, ray, minTime, maxTime, record); leftResult != Mesh::RayTraceResult::Missed) {
+        if(auto leftResult = InnerFindClosestHit(*node.m_left, ray, minTime, maxTime, record); leftResult != Mesh::RayTraceResult::Missed) {
             result = leftResult;
         }
     }

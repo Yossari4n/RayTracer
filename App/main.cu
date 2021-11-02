@@ -16,7 +16,7 @@
 
 void HostMain(const std::string& path) {
     rt::Camera camera(
-        rt::Point3(0.0f, 0.0f, 25.0f),       // look from
+        rt::Point3(0.0f, 0.0f, 25.0f),      // look from
         rt::Point3(0.0f, 2.0f, 0.0f),       // look at
         rt::Vector3(0.0f, 1.0f, 0.0f),      // up
         20.0f,                              // vfov
@@ -52,7 +52,7 @@ void DeviceMain(const std::string& path) {
 
 int main(int argc, char* argv[]) {
     const std::string path = argv[1];
-    DeviceMain(path);
+    HostMain(path);
 
     return 0;
 }
