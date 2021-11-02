@@ -11,9 +11,9 @@
 #include "Triangle.h"
 #include "AABB.h"
 
-#include "DiffuseLight.h"
-#include "Lambertian.h"
-#include "DebugMaterial.h"
+#include "host/DiffuseLight.h"
+#include "host/Lambertian.h"
+#include "host/DebugMaterial.h"
 
 #include <vector>
 #include <memory>

@@ -7,7 +7,7 @@ namespace rt {
 
 class IRenderTarget {
 public:
-    virtual ~IRenderTarget() {}
+    virtual ~IRenderTarget() = default;
 
     virtual void WriteColor(size_t x, size_t y, const Color& color, unsigned int samplesPerPixel) = 0;
     virtual void SaveBuffer() = 0;

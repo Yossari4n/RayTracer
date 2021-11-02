@@ -14,9 +14,16 @@ namespace rt::device {
 
 class IRayGenerator {
 public:
+    class IDevice {
+    public:
+        __device__ virtual Ray GenerateRay(float s, float t, curandState* localRandState) const = 0;
+    };
+
+    using DevicePtr = IRayGenerator::IDevice**;
+
     virtual ~IRayGenerator() = default;
 
-    __device__ virtual Ray GenerateRay(float s, float t, curandState* localRandState) const = 0;
+    virtual DevicePtr ToDevice() = 0;
 };
 
 }

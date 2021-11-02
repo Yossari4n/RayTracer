@@ -7,7 +7,6 @@
 #include "IRayGenerator.h"
 #include "ISpacePartitioner.h"
 #include "IRenderTarget.h"
-
 #include "../Mesh.h"
 #include "../Debug.h"
 
@@ -27,13 +26,13 @@ void Scene::LoadScene(const std::string& path) {
     tinyobj::ObjReader reader;
     if(!reader.ParseFromFile(path, config)) {
         if(!reader.Error().empty()) {
-            LOG_ERROR("Failed to load scene " << path << reader.Error());
+            LOG_ERROR("Failed to load scene %s\n", path.c_str());
         }
         return;
     }
 
     if(!reader.Warning().empty()) {
-        LOG_WARNING(reader.Warning());
+        LOG_WARNING("%s\n", reader.Warning().c_str());
     }
 
     auto& attrib = reader.GetAttrib();
@@ -55,7 +54,8 @@ void Scene::GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth) c
     const Color missColor(0.0f);
 
     for(int j = height - 1; j >= 0; j--) {
-        LOG_INFO("Scanlines remaining: " << j << ' ' << std::flush);
+        LOG_INFO("Scanlines remaining: %d", j);
+        LOG_FLUSH();
 
         for(int i = 0; i < width; i++) {
             Color color(0.0f);
@@ -73,7 +73,7 @@ void Scene::GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth) c
         }
     }
 
-    LOG_INFO('\n');
+    LOG_INFO("\n");
     m_renderTarget->SaveBuffer();
 }
 

@@ -90,6 +90,14 @@ inline Vector3 RandomInUnitDisk() {
     }
 }
 
+__device__ inline Vector3 RandomInUnitDisk(curandState* rand) {
+    glm::vec3 p;
+    do {
+        p = 2.0f * glm::vec3(curand_uniform(rand), curand_uniform(rand), 0) - glm::vec3(1, 1, 0);
+    } while(dot(p, p) >= 1.0f);
+    return p;
+}
+
 }
 
 #endif
