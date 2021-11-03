@@ -32,6 +32,8 @@ set(
 	"host/KDTree.h"
 	"host/KDTree.cpp"
 	"host/IMaterial.h"
+	"host/MaterialFactory.h"
+	"host/MaterialFactory.cpp"
 	"host/DiffuseLight.h"
 	"host/DiffuseLight.cpp"
 	"host/Lambertian.h"
