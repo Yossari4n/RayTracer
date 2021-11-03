@@ -2,10 +2,6 @@
 
 namespace rt {
 
-std::unique_ptr<IMaterial> DebugMaterial::Clone() const {
-    return std::make_unique<DebugMaterial>();
-}
-
 bool DebugMaterial::Scatter(const Ray& ray, const Triangle::HitRecord& hitRecord, ScatterRecord& scatterRecord) const {
     Vector3 scatterDirection = hitRecord.m_normal + RandomUnit();
 

@@ -54,7 +54,7 @@ void DeviceMain(const std::string& path) {
 
 int main(int argc, char* argv[]) {
     const std::string path = argv[1];
-    DeviceMain(path);
+    HostMain(path);
 
     return 0;
 }

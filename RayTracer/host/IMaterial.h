@@ -19,8 +19,6 @@ public:
 
     virtual ~IMaterial() = default;
 
-    virtual std::unique_ptr<IMaterial> Clone() const = 0;
-
     virtual bool Scatter(const Ray& ray, const Triangle::HitRecord& hitRecord, ScatterRecord& scatterRecord) const = 0;
     virtual Color Emit(const Triangle::HitRecord& record) const = 0;
 };

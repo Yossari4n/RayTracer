@@ -5,10 +5,6 @@ namespace rt {
 Lambertian::Lambertian(const Color& albedo)
     : m_albedo(albedo) {}
 
-std::unique_ptr<IMaterial> Lambertian::Clone() const {
-    return std::make_unique<Lambertian>(m_albedo);
-}
-
 bool Lambertian::Scatter(const Ray& ray, const Triangle::HitRecord& hitRecord, IMaterial::ScatterRecord& scatterRecord) const {
     Vector3 scatterDirection = hitRecord.m_normal + RandomUnit();
 

@@ -11,9 +11,7 @@
 #include "Triangle.h"
 #include "AABB.h"
 
-#include "host/DiffuseLight.h"
-#include "host/Lambertian.h"
-#include "host/DebugMaterial.h"
+#include "host/MaterialFactory.h"
 
 #include <vector>
 #include <memory>
@@ -43,8 +41,9 @@ public:
         float m_time;
     };
 
-    Mesh(const tinyobj::attrib_t& attrib, const tinyobj::shape_t& shape, const tinyobj::material_t& material)
-        : m_name(shape.name) {
+    Mesh(const tinyobj::attrib_t& attrib, const tinyobj::shape_t& shape, IMaterial* material)
+        : m_name(shape.name)
+        , m_material(material) {
         Point3 min(FLT_MAX);
         Point3 max(FLT_MIN);
         for(size_t i = 0; i < shape.mesh.indices.size(); i += 3) {
@@ -73,19 +72,11 @@ public:
         }
 
         m_volume = AABB(min, max);
-
-        if(material.name == "Light") {
-            Color emmit(material.diffuse[0], material.diffuse[1], material.diffuse[2]);
-            m_material = std::make_unique<DiffuseLight>(emmit);
-        } else {
-            Color albedo(material.diffuse[0], material.diffuse[1], material.diffuse[2]);
-            m_material = std::make_unique<Lambertian>(albedo);
-        }
     }
 
-    Mesh(const std::vector<Triangle>& triangles, std::unique_ptr<IMaterial> material, const std::string& name)
+    Mesh(const std::vector<Triangle>& triangles, IMaterial* material, const std::string& name)
     : m_triangles(triangles)
-        , m_material(std::move(material))
+        , m_material(material)
         , m_name(name) {
         Point3 min(FLT_MAX);
         Point3 max(FLT_MIN);
@@ -96,26 +87,6 @@ public:
 
         m_volume = AABB(min, max);
     }
-
-    Mesh() = delete;
-
-    Mesh(const Mesh& other)
-        : m_volume(other.m_volume)
-        , m_triangles(other.m_triangles)
-        , m_material(other.m_material->Clone())
-        , m_name(other.m_name) {}
-
-    Mesh& operator=(const Mesh& other) {
-        m_volume = other.m_volume;
-        m_triangles = other.m_triangles;
-        m_material = other.m_material->Clone();
-        m_name = other.m_name;
-
-        return *this;
-    }
-
-    Mesh(Mesh&& other) = default;
-    Mesh& operator=(Mesh&& other) = default;
 
     RayTraceResult RayTrace(const Ray& ray, float minTime, float maxTime, RayTraceRecord& result) const {
         Triangle::HitRecord closestHit{};
@@ -159,8 +130,8 @@ public:
             }
         }
 
-        std::optional<Mesh> further = furthers.empty() ? std::nullopt : std::make_optional<Mesh>(furthers, std::move(m_material->Clone()), m_name);
-        std::optional<Mesh> closer = closers.empty() ? std::nullopt : std::make_optional<Mesh>(closers, std::move(m_material->Clone()), m_name);
+        std::optional<Mesh> further = furthers.empty() ? std::nullopt : std::make_optional<Mesh>(furthers, m_material, m_name);
+        std::optional<Mesh> closer = closers.empty() ? std::nullopt : std::make_optional<Mesh>(closers, m_material, m_name);
 
         return std::make_pair(closer, further);
     }
@@ -172,8 +143,7 @@ public:
 private:
     AABB m_volume;
     std::vector<Triangle> m_triangles;
-    std::unique_ptr<IMaterial> m_material;
-    std::string m_name;
+    IMaterial* m_material;
 };
 
 }
