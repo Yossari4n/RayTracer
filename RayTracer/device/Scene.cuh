@@ -41,12 +41,12 @@ __global__ void GenerateFrameKernel(unsigned int samplesPerPixel, unsigned int m
 
     const int pixelIndex = j * maxX + i;
     curandState localRandState = randState[pixelIndex];
-    glm::vec3 color(1, 1, 1);
+    glm::vec3 color(0.0f);
     for(int s = 0; s < samplesPerPixel; s++) {
         float u = float(i + curand_uniform(&localRandState)) / float(maxX);
         float v = float(j + curand_uniform(&localRandState)) / float(maxY);
         Ray ray = (*d_rayGenerator)->GenerateRay(u, v, &localRandState);
-        //color += (*d_partitioner)->Traverse(ray, maxDepth, missColor, &localRandState);
+        color += (*d_partitioner)->Traverse(ray, maxDepth, missColor, &localRandState);
     }
 
     randState[pixelIndex] = localRandState;
@@ -80,7 +80,7 @@ public:
         CHECK_CUDA(cudaGetLastError());
         CHECK_CUDA(cudaDeviceSynchronize());
 
-        GenerateFrameKernel<<<blocks, threads>>>(samplesPerPixel, maxDepth, missColor, m_rayGenerator->ToDevice(), nullptr, m_renderTarget->ToDevice(), state);
+        GenerateFrameKernel<<<blocks, threads>>>(samplesPerPixel, maxDepth, missColor, m_rayGenerator->ToDevice(), m_accelerationStructure->ToDevice(), m_renderTarget->ToDevice(), state);
         CHECK_CUDA(cudaGetLastError());
         CHECK_CUDA(cudaDeviceSynchronize());
 

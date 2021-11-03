@@ -47,6 +47,7 @@ set(
 	"device/IRenderTarget.cuh"
 	"device/PPMTarget.cuh"
 	"device/IAccelerationStructure.cuh"
+	"device/BruteForce.cuh"
 )
 
 add_library(

@@ -42,8 +42,7 @@ public:
     };
 
     Mesh(const tinyobj::attrib_t& attrib, const tinyobj::shape_t& shape, IMaterial* material)
-        : m_name(shape.name)
-        , m_material(material) {
+        : m_material(material) {
         Point3 min(FLT_MAX);
         Point3 max(FLT_MIN);
         for(size_t i = 0; i < shape.mesh.indices.size(); i += 3) {
@@ -74,10 +73,9 @@ public:
         m_volume = AABB(min, max);
     }
 
-    Mesh(const std::vector<Triangle>& triangles, IMaterial* material, const std::string& name)
-    : m_triangles(triangles)
-        , m_material(material)
-        , m_name(name) {
+    Mesh(const std::vector<Triangle>& triangles, IMaterial* material)
+        : m_triangles(triangles)
+        , m_material(material) {
         Point3 min(FLT_MAX);
         Point3 max(FLT_MIN);
         for(const auto& triangle : m_triangles) {
@@ -130,8 +128,8 @@ public:
             }
         }
 
-        std::optional<Mesh> further = furthers.empty() ? std::nullopt : std::make_optional<Mesh>(furthers, m_material, m_name);
-        std::optional<Mesh> closer = closers.empty() ? std::nullopt : std::make_optional<Mesh>(closers, m_material, m_name);
+        std::optional<Mesh> further = furthers.empty() ? std::nullopt : std::make_optional<Mesh>(furthers, m_material);
+        std::optional<Mesh> closer = closers.empty() ? std::nullopt : std::make_optional<Mesh>(closers, m_material);
 
         return std::make_pair(closer, further);
     }
