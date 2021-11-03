@@ -31,8 +31,8 @@ __global__ void InitCurandState(unsigned int maxX, unsigned int maxY, curandStat
 }
 
 __global__ void GenerateFrameKernel(unsigned int samplesPerPixel, unsigned int maxDepth, Color missColor, IRayGenerator::DevicePtr d_rayGenerator, IAccelerationStructure::DevicePtr d_partitioner, IRenderTarget::DevicePtr d_target, curandState* randState) {
-    const unsigned int maxX = 1;//static_cast<unsigned int>((*d_target)->Width());
-    const unsigned int maxY = 1;//static_cast<unsigned int>((*d_target)->Height());
+    const unsigned int maxX = static_cast<unsigned int>((*d_target)->Width());
+    const unsigned int maxY = static_cast<unsigned int>((*d_target)->Height());
 
     const int i = threadIdx.x + blockIdx.x * blockDim.x;
     const int j = threadIdx.y + blockIdx.y * blockDim.y;
@@ -41,7 +41,7 @@ __global__ void GenerateFrameKernel(unsigned int samplesPerPixel, unsigned int m
 
     const int pixelIndex = j * maxX + i;
     curandState localRandState = randState[pixelIndex];
-    glm::vec3 color(0, 0, 0);
+    glm::vec3 color(1, 1, 1);
     for(int s = 0; s < samplesPerPixel; s++) {
         float u = float(i + curand_uniform(&localRandState)) / float(maxX);
         float v = float(j + curand_uniform(&localRandState)) / float(maxY);
@@ -50,23 +50,23 @@ __global__ void GenerateFrameKernel(unsigned int samplesPerPixel, unsigned int m
     }
 
     randState[pixelIndex] = localRandState;
-    //(*d_target)->WriteColor(i, j, color, samplesPerPixel);
+    (*d_target)->WriteColor(i, j, color, samplesPerPixel);
 }
 
 }
 
 class Scene {
 public:
-    __host__ Scene(IRayGenerator* rayGenerator, IAccelerationStructure* spacePartitioner, IRenderTarget* renderTarget)
+    __host__ Scene(IRayGenerator* rayGenerator, IAccelerationStructure* accelerationStructure, IRenderTarget* renderTarget)
         : m_rayGenerator(rayGenerator)
-        , m_spacePartitioner(spacePartitioner)
+        , m_accelerationStructure(accelerationStructure)
         , m_renderTarget(renderTarget) {}
 
     __host__ void LoadScene(const std::string& path) {}
 
     __host__ void GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth, unsigned int tx, unsigned int ty) const {
-        const unsigned int width = 1; //static_cast<unsigned int>(m_renderTarget->Width());
-        const unsigned int height = 1; //static_cast<unsigned int>(m_renderTarget->Height());
+        const unsigned int width = static_cast<unsigned int>(m_renderTarget->Width());
+        const unsigned int height = static_cast<unsigned int>(m_renderTarget->Height());
         const unsigned int pixelsCount = width * height;
         const Color missColor(0.0f);
 
@@ -80,14 +80,16 @@ public:
         CHECK_CUDA(cudaGetLastError());
         CHECK_CUDA(cudaDeviceSynchronize());
 
-        GenerateFrameKernel<<<blocks, threads>>>(samplesPerPixel, maxDepth, missColor, m_rayGenerator->ToDevice(), nullptr, nullptr, state);
+        GenerateFrameKernel<<<blocks, threads>>>(samplesPerPixel, maxDepth, missColor, m_rayGenerator->ToDevice(), nullptr, m_renderTarget->ToDevice(), state);
         CHECK_CUDA(cudaGetLastError());
         CHECK_CUDA(cudaDeviceSynchronize());
+
+        m_renderTarget->SaveBuffer();
     }
 
 private:
     IRayGenerator* m_rayGenerator;
-    IAccelerationStructure* m_spacePartitioner;
+    IAccelerationStructure* m_accelerationStructure;
     IRenderTarget* m_renderTarget;
 };
 

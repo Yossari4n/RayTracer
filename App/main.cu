@@ -6,6 +6,7 @@
 #include <RayTracer/host/Scene.h>
 
 #include <RayTracer/device/Camera.cuh>
+#include <RayTracer/device/PPMTarget.cuh>
 #include <RayTracer/device/Scene.cuh>
 
 #define TINYOBJLOADER_IMPLEMENTATION 
@@ -44,15 +45,16 @@ void DeviceMain(const std::string& path) {
         0.1f,                               // aperture
         10.0f                               // focus_distance
     );
+    rt::device::PPMTarget target(5, 5);
 
-    rt::device::Scene scene(&camera, nullptr, nullptr);
+    rt::device::Scene scene(&camera, nullptr, &target);
     scene.LoadScene(path);
-    scene.GenerateFrame(1, 10, 8, 8);
+    scene.GenerateFrame(1, 1, 8, 8);
 }
 
 int main(int argc, char* argv[]) {
     const std::string path = argv[1];
-    HostMain(path);
+    DeviceMain(path);
 
     return 0;
 }

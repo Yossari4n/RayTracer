@@ -56,6 +56,7 @@ public:
     };
 
     Camera(const Point3& lookFrom, const Point3& lookAt, const Vector3& up, float fov, float aspectRatio, float aperture, float focusDistance);
+    ~Camera();
 
     DevicePtr ToDevice() override {
         return d_camera;
@@ -71,11 +72,21 @@ __global__ void CreateCameraDeviceObject(IRayGenerator::DevicePtr cameraPtr, Poi
     (*cameraPtr) = new Camera::DeviceCamera(lookFrom, lookAt, up, fov, aspectRatio, aperture, focusDistance);
 }
 
+__global__ void DeleteCameraDeviceObject(IRayGenerator::DevicePtr cameraPtr) {
+    delete cameraPtr;
+}
+
 }
 
 Camera::Camera(const Point3& lookFrom, const Point3& lookAt, const Vector3& up, float fov, float aspectRatio, float aperture, float focusDistance) {
     CHECK_CUDA(cudaMalloc((void**)&d_camera, sizeof(IDevice*)));
     CreateCameraDeviceObject << <1, 1 >> > (d_camera, lookFrom, lookAt, up, fov, aspectRatio, aperture, focusDistance);
+    CHECK_CUDA(cudaGetLastError());
+    CHECK_CUDA(cudaDeviceSynchronize());
+}
+
+Camera::~Camera() {
+    DeleteCameraDeviceObject<<<1, 1>>>(d_camera);
     CHECK_CUDA(cudaGetLastError());
     CHECK_CUDA(cudaDeviceSynchronize());
 }

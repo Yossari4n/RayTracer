@@ -23,7 +23,7 @@ private:
     size_t m_width;
     size_t m_height;
 
-    std::vector<Color> m_FrameBuffer;
+    std::vector<Color> m_frameBuffer;
 };
 
 }

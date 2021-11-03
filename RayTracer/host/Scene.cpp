@@ -12,9 +12,9 @@
 
 namespace rt {
 
-Scene::Scene(IRayGenerator* rayGenerator, IAccelerationStructure* spacePartitioner, IRenderTarget* renderTarget)
+Scene::Scene(IRayGenerator* rayGenerator, IAccelerationStructure* accelerationStructure, IRenderTarget* renderTarget)
     : m_rayGenerator(rayGenerator)
-    , m_spacePartitioner(spacePartitioner)
+    , m_accelerationStructure(accelerationStructure)
     , m_renderTarget(renderTarget) {}
 
 void Scene::LoadScene(const std::string& path) {
@@ -42,7 +42,7 @@ void Scene::LoadScene(const std::string& path) {
         meshes.emplace_back(attrib, shape, materials[shape.mesh.material_ids[0]]);
     }
 
-    m_spacePartitioner->PartitionSpace(meshes);
+    m_accelerationStructure->PartitionSpace(meshes);
 }
 
 void Scene::GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth) const {
@@ -63,7 +63,7 @@ void Scene::GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth) c
                 const float v = static_cast<float>(j + Random<float>()) / (static_cast<float>(height) - 1);
 
                 const Ray& ray = m_rayGenerator->GenerateRay(u, v);
-                color += m_spacePartitioner->Traverse(ray, maxDepth, missColor);
+                color += m_accelerationStructure->Traverse(ray, maxDepth, missColor);
             }
 
             m_renderTarget->WriteColor(i, height - j - 1, color, samplesPerPixel);

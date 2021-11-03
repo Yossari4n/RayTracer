@@ -24,6 +24,7 @@ set(
 	"host/Camera.h"
 	"host/Camera.cpp"
 	"host/IAccelerationStructure.h"
+	"host/IAccelerationStructure.cpp"
 	"host/BruteForce.h"
 	"host/BruteForce.cpp"
 	"host/BVH.h"
@@ -42,6 +43,7 @@ set(
 	"device/IRayGenerator.cuh"
 	"device/Camera.cuh"
 	"device/IRenderTarget.cuh"
+	"device/PPMTarget.cuh"
 	"device/IAccelerationStructure.cuh"
 )
 

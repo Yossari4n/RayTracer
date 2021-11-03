@@ -5,7 +5,7 @@ namespace rt {
 PPMTarget::PPMTarget(size_t width, size_t height)
     : m_width(width)
     , m_height(height) {
-    m_FrameBuffer.resize(m_width * m_height);
+    m_frameBuffer.resize(m_width * m_height);
 }
 
 void PPMTarget::WriteColor(size_t x, size_t y, const Color& color, unsigned int samplesPerPixel) {
@@ -15,7 +15,7 @@ void PPMTarget::WriteColor(size_t x, size_t y, const Color& color, unsigned int 
     const float b = sqrtf(scale * color.z);
 
     const size_t index = y * m_width + x;
-    m_FrameBuffer[index] = Color(r, g, b);
+    m_frameBuffer[index] = Color(r, g, b);
 }
 
 void PPMTarget::SaveBuffer() {
@@ -25,7 +25,7 @@ void PPMTarget::SaveBuffer() {
 
     const size_t size = m_width * m_height;
     for(size_t i = 0; i < size; i++) {
-        const Color color = m_FrameBuffer[i];
+        const Color color = m_frameBuffer[i];
 
         std::cout << static_cast<int>(256 * glm::clamp(color.r, 0.0f, 0.999f)) << ' '
             << static_cast<int>(256 * glm::clamp(color.g, 0.0f, 0.999f)) << ' '
