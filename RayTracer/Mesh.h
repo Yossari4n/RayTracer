@@ -5,13 +5,11 @@
 #include "tiny_obj_loader.h"
 #pragma warning(pop)
 
-#include "host/IMaterial.h"
+#include "Material.h"
 #include "Color.h"
 #include "Ray.h"
 #include "Triangle.h"
 #include "AABB.h"
-
-#include "host/MaterialFactory.h"
 
 #include <vector>
 #include <memory>
@@ -41,8 +39,11 @@ public:
         float m_time;
     };
 
-    Mesh(const tinyobj::attrib_t& attrib, const tinyobj::shape_t& shape, IMaterial* material)
-        : m_material(material) {
+    Mesh(const tinyobj::attrib_t& attrib, const tinyobj::shape_t& shape, const tinyobj::material_t& material)
+        : m_triangleCount(shape.mesh.num_face_vertices.size())
+        , m_triangles(new Triangle[m_triangleCount])
+        , m_material(material) {
+
         Point3 min(FLT_MAX);
         Point3 max(FLT_MIN);
         for(size_t i = 0; i < shape.mesh.indices.size(); i += 3) {
@@ -67,18 +68,22 @@ public:
             min = glm::min(min, glm::min(p1, glm::min(p2, p3)));
             max = glm::max(max, glm::max(p1, glm::max(p2, p3)));
 
-            m_triangles.emplace_back(p1, p2, p3);
+            m_triangles[i / 3] = Triangle(p1, p2, p3);
         }
 
         m_volume = AABB(min, max);
     }
 
-    Mesh(const std::vector<Triangle>& triangles, IMaterial* material)
-        : m_triangles(triangles)
+    Mesh(const std::vector<Triangle>& triangles, const Material& material)
+        : m_triangles(new Triangle[m_triangleCount])
+        , m_triangleCount(triangles.size())
         , m_material(material) {
+        std::copy(triangles.begin(), triangles.end(), m_triangles);
+
         Point3 min(FLT_MAX);
         Point3 max(FLT_MIN);
-        for(const auto& triangle : m_triangles) {
+        for(int i = 0; i < m_triangleCount; i++) {
+            const auto& triangle = triangles[i];
             min = glm::min(min, glm::min(triangle.V0(), glm::min(triangle.V1(), triangle.V2())));
             max = glm::max(max, glm::max(triangle.V0(), glm::max(triangle.V1(), triangle.V2())));
         }
@@ -86,12 +91,57 @@ public:
         m_volume = AABB(min, max);
     }
 
+    Mesh() = default;
+
+    Mesh(const Mesh& rhs)
+        : m_volume(rhs.m_volume)
+        , m_triangleCount(rhs.m_triangleCount)
+        , m_triangles(new Triangle[m_triangleCount])
+        , m_material(rhs.m_material) {
+        std::copy(rhs.m_triangles, rhs.m_triangles + m_triangleCount, m_triangles);
+    }
+
+    Mesh& operator=(const Mesh& rhs) {
+        delete[] m_triangles;
+
+        m_volume = rhs.m_volume;
+        m_triangleCount = rhs.m_triangleCount;
+        m_triangles = new Triangle[m_triangleCount];
+        std::copy(rhs.m_triangles, rhs.m_triangles + m_triangleCount, m_triangles);
+        m_material = Material(rhs.m_material);
+
+        return *this;
+    }
+
+    Mesh(Mesh&& rhs) noexcept
+        : m_volume(rhs.m_volume)
+        , m_triangleCount(std::exchange(rhs.m_triangleCount, 0))
+        , m_triangles(std::exchange(rhs.m_triangles, nullptr))
+        , m_material(rhs.m_material) {}
+
+    Mesh& operator=(Mesh&& rhs) noexcept {
+        delete[] m_triangles;
+
+        m_volume = rhs.m_volume;
+        m_triangleCount = std::exchange(rhs.m_triangleCount, 0);
+        m_triangles = std::exchange(rhs.m_triangles, nullptr);
+        m_material = rhs.m_material;
+
+        return *this;
+    }
+
+    ~Mesh() {
+        delete[] m_triangles;
+    }
+
     RayTraceResult RayTrace(const Ray& ray, float minTime, float maxTime, RayTraceRecord& result) const {
         Triangle::HitRecord closestHit{};
         closestHit.m_time = maxTime;
 
         bool hitted = false;
-        for(const auto& triangle : m_triangles) {
+        for(int i = 0; i < m_triangleCount; i++) {
+            const auto& triangle = m_triangles[i];
+
             if(triangle.Hit(ray, minTime, closestHit.m_time, closestHit)) {
                 hitted = true;
             }
@@ -102,11 +152,44 @@ public:
         }
 
         result.m_time = closestHit.m_time;
-        result.m_emitted = m_material->Emit(closestHit);
+        if(Material::EmitResult emitResult{}; m_material.Emit(ray, closestHit, emitResult)) {
+            result.m_emitted = emitResult.m_emitted;
+        }
 
-        if(IMaterial::ScatterRecord record{}; m_material->Scatter(ray, closestHit, record)) {
-            result.m_attenuation = record.m_attenuation;
-            result.m_scattered = record.m_scattered;
+        if(Material::ScatterResult scatterResult{}; m_material.Scatter(ray, closestHit, scatterResult)) {
+            result.m_attenuation = scatterResult.m_attenuation;
+            result.m_scattered = scatterResult.m_scattered;
+            return RayTraceResult::Scattered;
+        }
+
+        return RayTraceResult::Emitted;
+    }
+
+    __device__ RayTraceResult RayTrace(const Ray& ray, float minTime, float maxTime, curandState* randState, RayTraceRecord& result) const {
+        Triangle::HitRecord closestHit{};
+        closestHit.m_time = maxTime;
+
+        bool hitted = false;
+        for(int i = 0; i < m_triangleCount; i++) {
+            const auto& triangle = m_triangles[i];
+
+            if(triangle.Hit(ray, minTime, closestHit.m_time, closestHit)) {
+                hitted = true;
+            }
+        }
+
+        if(!hitted) {
+            return RayTraceResult::Missed;
+        }
+
+        result.m_time = closestHit.m_time;
+        if(Material::EmitResult emitResult{}; m_material.Emit(ray, closestHit, randState, emitResult)) {
+            result.m_emitted = emitResult.m_emitted;
+        }
+
+        if(Material::ScatterResult scatterResult{}; m_material.Scatter(ray, closestHit, randState, scatterResult)) {
+            result.m_attenuation = scatterResult.m_attenuation;
+            result.m_scattered = scatterResult.m_scattered;
             return RayTraceResult::Scattered;
         }
 
@@ -118,7 +201,8 @@ public:
         std::vector<Triangle> closers;
 
         const glm::length_t splitAxisIndex = static_cast<glm::length_t>(axis);
-        for(const auto& triangle : m_triangles) {
+        for(int i = 0; i < m_triangleCount; i++) {
+            const auto& triangle = m_triangles[i];
             const Point3 midPoint = triangle.MidPoint();
 
             if(midPoint[splitAxisIndex] < splitPoint[splitAxisIndex]) {
@@ -138,10 +222,13 @@ public:
         return m_volume;
     }
 
-private:
+//private:
     AABB m_volume;
-    std::vector<Triangle> m_triangles;
-    IMaterial* m_material;
+
+    size_t m_triangleCount{0};
+    Triangle* m_triangles{nullptr};
+
+    Material m_material;
 };
 
 }

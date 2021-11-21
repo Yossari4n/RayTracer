@@ -22,6 +22,8 @@ public:
         float m_time;
     };
 
+    __host__ __device__ Triangle() = default;
+
     __host__ __device__ Triangle(const Point3& v1, const Point3& v2, const Point3& v3)
         : m_v0(v1)
         , m_v1(v2)
@@ -30,6 +32,7 @@ public:
     __host__ __device__ bool Hit(const Ray& ray, float minTime, float maxTime, HitRecord& record) const {
         const Vector3 edge1 = m_v1 - m_v0;
         const Vector3 edge2 = m_v2 - m_v0;
+
         const Vector3 pvec = glm::cross(ray.Direction(), edge2);
         const float det = glm::dot(edge1, pvec);
 
@@ -67,8 +70,8 @@ public:
     }
 
     __host__ __device__ Point3 V0() const { return m_v0; }
-    __host__ __device__ Point3 V1() const { return m_v0; }
-    __host__ __device__ Point3 V2() const { return m_v0; }
+    __host__ __device__ Point3 V1() const { return m_v1; }
+    __host__ __device__ Point3 V2() const { return m_v2; }
 
 private:
     Point3 m_v0{0.0f};

@@ -62,7 +62,33 @@ public:
         , m_accelerationStructure(accelerationStructure)
         , m_renderTarget(renderTarget) {}
 
-    __host__ void LoadScene(const std::string& path) {}
+    __host__ void LoadScene(const std::string& path) {
+        tinyobj::ObjReaderConfig config;
+
+        tinyobj::ObjReader reader;
+        if(!reader.ParseFromFile(path, config)) {
+            if(!reader.Error().empty()) {
+                LOG_ERROR("Failed to load scene %s\n", path.c_str());
+            }
+            return;
+        }
+
+        if(!reader.Warning().empty()) {
+            LOG_WARNING("%s\n", reader.Warning().c_str());
+        }
+
+        auto& attrib = reader.GetAttrib();
+        auto& shapes = reader.GetShapes();
+        auto& materials = reader.GetMaterials();
+
+        std::vector<Mesh> meshes;
+        meshes.reserve(shapes.size());
+        for(const auto& shape : shapes) {
+            meshes.emplace_back(attrib, shape, materials[shape.mesh.material_ids[0]]);
+        }
+
+        m_accelerationStructure->PartitionSpace(meshes);
+    }
 
     __host__ void GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth, unsigned int tx, unsigned int ty) const {
         const unsigned int width = static_cast<unsigned int>(m_renderTarget->Width());
@@ -75,14 +101,14 @@ public:
 
         // Init CUDA random
         curandState* state = nullptr;
-        CHECK_CUDA(cudaMalloc((void**)&state, width * height * sizeof(curandState)));
+        CHECK_CUDA( cudaMalloc((void**)&state, width * height * sizeof(curandState)) );
         InitCurandState<<<blocks, threads>>>(width, height, state);
-        CHECK_CUDA(cudaGetLastError());
-        CHECK_CUDA(cudaDeviceSynchronize());
+        CHECK_CUDA( cudaGetLastError() );
+        CHECK_CUDA( cudaDeviceSynchronize() );
 
         GenerateFrameKernel<<<blocks, threads>>>(samplesPerPixel, maxDepth, missColor, m_rayGenerator->ToDevice(), m_accelerationStructure->ToDevice(), m_renderTarget->ToDevice(), state);
-        CHECK_CUDA(cudaGetLastError());
-        CHECK_CUDA(cudaDeviceSynchronize());
+        CHECK_CUDA( cudaGetLastError() );
+        CHECK_CUDA( cudaDeviceSynchronize() );
 
         m_renderTarget->SaveBuffer();
     }

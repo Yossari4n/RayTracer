@@ -12,6 +12,7 @@ set(
 	"Triangle.h"
 	"AABB.h"
 	"Mesh.h"
+	"Material.h"
 	"Debug.h"
 	"tiny_obj_loader.h"
 
@@ -31,15 +32,6 @@ set(
 	"host/BVH.cpp"
 	"host/KDTree.h"
 	"host/KDTree.cpp"
-	"host/IMaterial.h"
-	"host/MaterialFactory.h"
-	"host/MaterialFactory.cpp"
-	"host/DiffuseLight.h"
-	"host/DiffuseLight.cpp"
-	"host/Lambertian.h"
-	"host/Lambertian.cpp"
-	"host/DebugMaterial.h"
-	"host/DebugMaterial.cpp"
 
 	"device/Scene.cuh"
 	"device/IRayGenerator.cuh"

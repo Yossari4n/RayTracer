@@ -27,7 +27,7 @@ void KDTree::PartitionSpace(const MeshList& raytracables) {
 }
 
 void KDTree::InnerPartitionSpace(Node& curr, const std::vector<Mesh>& raytracables, int depth) {
-    for(const auto raytracable : raytracables) {
+    for(const auto& raytracable : raytracables) {
         curr.m_volume = AABB(curr.m_volume, raytracable.Volume());
     }
 

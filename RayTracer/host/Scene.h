@@ -4,7 +4,6 @@
 #include "IRayGenerator.h"
 #include "IAccelerationStructure.h"
 #include "IRenderTarget.h"
-#include "MaterialFactory.h"
 
 #include <string>
 
@@ -21,7 +20,6 @@ protected:
     IRayGenerator* m_rayGenerator;
     IAccelerationStructure* m_accelerationStructure;
     IRenderTarget* m_renderTarget;
-    MaterialFactory m_materialFactory;
 };
 
 }

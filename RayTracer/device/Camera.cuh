@@ -24,14 +24,14 @@ public:
             const float viewport_height = 2.0f * h;
             const float viewport_width = aspectRatio * viewport_height;
 
-            Vector3 m_w = glm::normalize(lookFrom - lookAt);
-            Vector3 m_u = glm::normalize(glm::cross(up, m_w));
-            Vector3 m_v = glm::cross(m_w, m_u);
+            m_w = glm::normalize(lookFrom - lookAt);
+            m_u = glm::normalize(glm::cross(up, m_w));
+            m_v = glm::cross(m_w, m_u);
 
-            Vector3 m_origin = lookFrom;
-            Vector3 m_horizontal = focusDistance * viewport_width * m_u;
-            Vector3 m_vertical = focusDistance * viewport_height * m_v;
-            Vector3 m_lowerLeft = m_origin - m_horizontal * 0.5f - m_vertical * 0.5f - focusDistance * m_w;
+            m_origin = lookFrom;
+            m_horizontal = focusDistance * viewport_width * m_u;
+            m_vertical = focusDistance * viewport_height * m_v;
+            m_lowerLeft = m_origin - m_horizontal * 0.5f - m_vertical * 0.5f - focusDistance * m_w;
         }
 
         __device__ Ray GenerateRay(float s, float t, curandState* localRandState) const override {
@@ -73,22 +73,22 @@ __global__ void CreateCameraDeviceObject(IRayGenerator::DevicePtr cameraPtr, Poi
 }
 
 __global__ void DeleteCameraDeviceObject(IRayGenerator::DevicePtr cameraPtr) {
-    delete cameraPtr;
+    delete (*cameraPtr);
 }
 
 }
 
 Camera::Camera(const Point3& lookFrom, const Point3& lookAt, const Vector3& up, float fov, float aspectRatio, float aperture, float focusDistance) {
-    CHECK_CUDA(cudaMalloc((void**)&d_camera, sizeof(IDevice*)));
-    CreateCameraDeviceObject << <1, 1 >> > (d_camera, lookFrom, lookAt, up, fov, aspectRatio, aperture, focusDistance);
-    CHECK_CUDA(cudaGetLastError());
-    CHECK_CUDA(cudaDeviceSynchronize());
+    CHECK_CUDA( cudaMalloc((void**)&d_camera, sizeof(IDevice*)) );
+    CreateCameraDeviceObject<<<1, 1>>>(d_camera, lookFrom, lookAt, up, fov, aspectRatio, aperture, focusDistance);
+    CHECK_CUDA( cudaGetLastError() );
+    CHECK_CUDA( cudaDeviceSynchronize() );
 }
 
 Camera::~Camera() {
     DeleteCameraDeviceObject<<<1, 1>>>(d_camera);
-    CHECK_CUDA(cudaGetLastError());
-    CHECK_CUDA(cudaDeviceSynchronize());
+    CHECK_CUDA( cudaGetLastError() );
+    CHECK_CUDA( cudaDeviceSynchronize() );
 }
 
 }

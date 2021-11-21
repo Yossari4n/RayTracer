@@ -1,8 +1,8 @@
 {
     "scene": "..\\..\\Scenes\\cornell_box.obj",
-    "samples_per_pixel": 15,
-    "max_depth": 15,
-    "cuda": false,
+    "samples_per_pixel": 50,
+    "max_depth": 10,
+    "cuda": true,
     "ray_generator": {
         "name": "Camera",
         "position": {
@@ -18,7 +18,7 @@
         "fov": 20
     },
     "acceleration_structure": {
-        "name": "KDTree"
+        "name": "BruteForce"
     },
     "render_target": {
         "name": "PPMTarget",

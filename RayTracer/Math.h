@@ -23,6 +23,8 @@ using Point3 = glm::vec3;
 using Vector2 = glm::vec2;
 using Vector3 = glm::vec3;
 
+#define RANDvec3 glm::vec3(curand_uniform(local_rand_state),curand_uniform(local_rand_state),curand_uniform(local_rand_state))
+
 template <typename T>
 __device__ __host__ inline void Swap(T& a, T& b) {
     T c = a;
@@ -88,6 +90,14 @@ inline Vector3 RandomInUnitDisk() {
             continue;
         return p;
     }
+}
+
+__device__ inline glm::vec3 RandomInUnitSphere(curandState* local_rand_state) {
+    glm::vec3 p;
+    do {
+        p = 2.0f * RANDvec3 - glm::vec3(1, 1, 1);
+    } while(glm::length(p) >= 1.0f);
+    return p;
 }
 
 __device__ inline Vector3 RandomInUnitDisk(curandState* rand) {

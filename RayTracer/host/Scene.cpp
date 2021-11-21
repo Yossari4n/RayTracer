@@ -39,7 +39,7 @@ void Scene::LoadScene(const std::string& path) {
     std::vector<Mesh> meshes;
     meshes.reserve(shapes.size());
     for(const auto& shape : shapes) {
-        meshes.emplace_back(attrib, shape, m_materialFactory.CreateMaterial(materials[shape.mesh.material_ids[0]]));
+        meshes.emplace_back(attrib, shape, materials[shape.mesh.material_ids[0]]);
     }
 
     m_accelerationStructure->PartitionSpace(meshes);

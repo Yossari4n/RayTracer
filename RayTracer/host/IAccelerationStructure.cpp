@@ -9,8 +9,7 @@ Color IAccelerationStructure::Traverse(const Ray& ray, unsigned int depth, const
 
     Mesh::RayTraceRecord record{};
     const Mesh::RayTraceResult result = FindClosestHit(ray, 0.001f, FLT_MAX, record);
-    switch(result)
-    {
+    switch(result) {
     case Mesh::RayTraceResult::Scattered:
         return record.m_emitted + record.m_attenuation * Traverse(record.m_scattered, depth - 1, missColor);
         break;

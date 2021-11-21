@@ -16,6 +16,8 @@ class IRayGenerator {
 public:
     class IDevice {
     public:
+        __device__ virtual ~IDevice() {};
+
         __device__ virtual Ray GenerateRay(float s, float t, curandState* localRandState) const = 0;
     };
 

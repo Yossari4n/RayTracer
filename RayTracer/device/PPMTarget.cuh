@@ -95,16 +95,16 @@ __global__ void CopyFrameBuffer(IRenderTarget::DevicePtr d_target, Color* frameB
 PPMTarget::PPMTarget(size_t width, size_t height)
     : m_width(width)
     , m_height(height) {
-    CHECK_CUDA(cudaMalloc((void**)&d_target, sizeof(IRenderTarget)));
+    CHECK_CUDA( cudaMalloc((void**)&d_target, sizeof(IRenderTarget)) );
     CreatePPMTargetDeviceObject<<<1, 1>>>(d_target, m_width, m_height);
-    CHECK_CUDA(cudaGetLastError());
-    CHECK_CUDA(cudaDeviceSynchronize());
+    CHECK_CUDA( cudaGetLastError() );
+    CHECK_CUDA( cudaDeviceSynchronize() );
 }
 
 PPMTarget::~PPMTarget() {
     DeletePPMTargetDeviceObject<<<1, 1>>>(d_target);
-    CHECK_CUDA(cudaGetLastError());
-    CHECK_CUDA(cudaDeviceSynchronize());
+    CHECK_CUDA( cudaGetLastError() );
+    CHECK_CUDA( cudaDeviceSynchronize() );
 }
 
 void PPMTarget::SaveBuffer() {
@@ -113,12 +113,11 @@ void PPMTarget::SaveBuffer() {
     cudaMallocManaged((void**)&frameBuffer, sizeof(Color) * m_width * m_height);
 
     CopyFrameBuffer<<<1, 1>>>(d_target, frameBuffer);
-    CHECK_CUDA(cudaGetLastError());
-    CHECK_CUDA(cudaDeviceSynchronize());
+    CHECK_CUDA( cudaGetLastError() );
+    CHECK_CUDA( cudaDeviceSynchronize() );
 
     std::cout << "P3\n" << m_width << ' ' << m_height << "\n255\n";
-    const size_t size = m_width * m_height;
-    for(size_t i = 0; i < size; i++) {
+    for(int i = m_width * m_height - 1; i >= 0; i--) {
         const Color color = frameBuffer[i];
 
         std::cout << static_cast<int>(256 * glm::clamp(color.r, 0.0f, 0.999f)) << ' '
