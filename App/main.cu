@@ -18,11 +18,41 @@
 #include <iostream>
 #include <string>
 
+namespace glm {
+
+void from_json(const nlohmann::json& j, glm::vec3& v) {
+    j.at("x").get_to(v.x);
+    j.at("y").get_to(v.y);
+    j.at("z").get_to(v.z);
+}
+
+}
+
+struct RayGeneratorConfig {
+    std::string name;
+    glm::vec3 position;
+    glm::vec3 lookAt;
+    float fov;
+};
+
+struct RenderTargetConfig {
+    std::string name;
+    unsigned int width;
+    unsigned int height;
+};
+
+struct AccelerationStructureConfig {
+    std::string name;
+};
+
 struct Config {
     std::string scene;
     unsigned int samplesPerPixel;
     unsigned int maxDepth;
     bool cuda;
+    RayGeneratorConfig rayGenerator;
+    AccelerationStructureConfig accelerationStructure;
+    RenderTargetConfig renderTarget;
 };
 
 void from_json(const nlohmann::json& json, Config& config) {
@@ -30,43 +60,100 @@ void from_json(const nlohmann::json& json, Config& config) {
     json.at("samples_per_pixel").get_to(config.samplesPerPixel);
     json.at("max_depth").get_to(config.maxDepth);
     json.at("cuda").get_to(config.cuda);
+
+    const auto& rayGenerator = json.at("ray_generator");
+    rayGenerator.at("name").get_to(config.rayGenerator.name);
+    rayGenerator.at("position").get_to(config.rayGenerator.position);
+    rayGenerator.at("look_at").get_to(config.rayGenerator.lookAt);
+    rayGenerator.at("fov").get_to(config.rayGenerator.fov);
+
+    const auto& accelerationStructure = json.at("acceleration_structure");
+    accelerationStructure.at("name").get_to(config.accelerationStructure.name);
+
+    const auto& renderTarget = json.at("render_target");
+    renderTarget.at("name").get_to(config.renderTarget.name);
+    renderTarget.at("width").get_to(config.renderTarget.width);
+    renderTarget.at("width").get_to(config.renderTarget.height);
 }
 
 void HostMain(const Config& config) {
-    rt::Camera camera(
-        rt::Point3(0.0f, 0.0f, 25.0f),      // look from
-        rt::Point3(0.0f, 2.0f, 0.0f),       // look at
-        rt::Vector3(0.0f, 1.0f, 0.0f),      // up
-        20.0f,                              // vfov
-        16.0f / 9.0f,                       // aspect ratio
-        0.1f,                               // aperture
-        10.0f                               // focus_distance
-    );
-    rt::BruteForce bf;
-    rt::BVH bvh;
-    rt::KDTree kdTree;
+    std::unique_ptr<rt::IRayGenerator> rayGenerator;
+    if(config.rayGenerator.name == "Camera") {
+        rayGenerator = std::make_unique<rt::Camera>(
+            config.rayGenerator.position,
+            config.rayGenerator.lookAt,
+            rt::Vector3(0.0f, 1.0f, 0.0f),      // up
+            config.rayGenerator.fov,
+            16.0f / 9.0f,                       // aspect ratio
+            0.1f,                               // aperture
+            10.0f                               // focus_distance
+        );
+    }
 
-    rt::PPMTarget target(400, 300);
-    rt::Scene scene(&camera, &bf, &target);
+    std::unique_ptr<rt::IAccelerationStructure> accelerationStructure;
+    if(config.accelerationStructure.name == "BruteForce") {
+        accelerationStructure = std::make_unique<rt::BruteForce>();
+    } else if(config.accelerationStructure.name == "BVH") {
+        accelerationStructure = std::make_unique<rt::BVH>();
+    } else if(config.accelerationStructure.name == "KDTree") {
+        accelerationStructure = std::make_unique<rt::KDTree>();
+    }
+
+    std::unique_ptr<rt::IRenderTarget> renderTarget;
+    if(config.renderTarget.name == "PPMTarget") {
+        renderTarget = std::make_unique<rt::PPMTarget>(
+            config.renderTarget.width,
+            config.renderTarget.height
+        );
+    }
+
+    rt::Scene scene(
+        rayGenerator.get(), 
+        accelerationStructure.get(), 
+        renderTarget.get()
+    );
 
     scene.LoadScene(config.scene);
     scene.GenerateFrame(config.samplesPerPixel, config.maxDepth);
 }
 
 void DeviceMain(const Config& config) {
-    rt::device::Camera camera(
-        rt::Point3(0.0f, 0.0f, 25.0f),      // look from
-        rt::Point3(0.0f, 2.0f, 0.0f),       // look at
-        rt::Vector3(0.0f, 1.0f, 0.0f),      // up
-        20.0f,                              // vfov
-        16.0f / 9.0f,                       // aspect ratio
-        0.1f,                               // aperture
-        10.0f                               // focus_distance
-    );
-    rt::device::PPMTarget target(400, 300);
-    rt::device::BruteForce bf;
+    std::unique_ptr<rt::device::IRayGenerator> rayGenerator;
+    if(config.rayGenerator.name == "Camera") {
+        rayGenerator = std::make_unique<rt::device::Camera>(
+            config.rayGenerator.position,
+            config.rayGenerator.lookAt,
+            rt::Vector3(0.0f, 1.0f, 0.0f),      // up
+            config.rayGenerator.fov,
+            16.0f / 9.0f,                       // aspect ratio
+            0.1f,                               // aperture
+            10.0f                               // focus_distance
+            );
+    }
 
-    rt::device::Scene scene(&camera, &bf, &target);
+    std::unique_ptr<rt::device::IAccelerationStructure> accelerationStructure;
+    if(config.accelerationStructure.name == "BruteForce") {
+        accelerationStructure = std::make_unique<rt::device::BruteForce>();
+    } else if(config.accelerationStructure.name == "BVH") {
+
+    } else if(config.accelerationStructure.name == "KDTree") {
+
+    }
+
+    std::unique_ptr<rt::device::IRenderTarget> renderTarget;
+    if(config.renderTarget.name == "PPMTarget") {
+        renderTarget = std::make_unique<rt::device::PPMTarget>(
+            config.renderTarget.width,
+            config.renderTarget.height
+        );
+    }
+
+    rt::device::Scene scene(
+        rayGenerator.get(),
+        accelerationStructure.get(),
+        renderTarget.get()
+    );
+
     scene.LoadScene(config.scene);
     scene.GenerateFrame(config.samplesPerPixel, config.maxDepth, 8, 8);
 }
