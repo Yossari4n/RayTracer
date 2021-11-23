@@ -3,6 +3,7 @@
 
 #include "IAccelerationStructure.h"
 
+#include "../BVHNode.h"
 #include "../AABB.h"
 
 namespace rt {
@@ -38,11 +39,10 @@ public:
     void PartitionSpace(const MeshList& raytracables) override;
 
 private:
-    void InnerParitionSpace(Node& curr, std::vector<const Mesh*>& raytracablePtrs, size_t start, size_t end);
     Mesh::RayTraceResult FindClosestHit(const Ray& ray, float minTime, float maxTime, Mesh::RayTraceRecord& record) const override;
-    Mesh::RayTraceResult InnerFindClosestHit(const BVH::Node& node, const Ray& ray, float minTime, float maxTime, Mesh::RayTraceRecord& record) const;
+    Mesh::RayTraceResult InnerFindClosestHit(const BVHNode& node, const Ray& ray, float minTime, float maxTime, Mesh::RayTraceRecord& record) const;
 
-    std::unique_ptr<Node> m_root;
+    std::unique_ptr<BVHNode> m_root;
 };
 
 }

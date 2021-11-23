@@ -45,8 +45,6 @@ public:
             return currentColor;
         }
 
-        __device__ virtual void Test() = 0;
-
     protected:
         __device__ virtual Mesh::RayTraceResult FindClosestHit(const Ray& ray, float minTime, float maxTime, curandState* randState, Mesh::RayTraceRecord& record) const = 0;
     };

@@ -8,6 +8,7 @@
 #include <RayTracer/device/Camera.cuh>
 #include <RayTracer/device/PPMTarget.cuh>
 #include <RayTracer/device/BruteForce.cuh>
+#include <RayTracer/device/BVH.cuh>
 #include <RayTracer/device/Scene.cuh>
 
 #define TINYOBJLOADER_IMPLEMENTATION 
@@ -135,7 +136,7 @@ void DeviceMain(const Config& config) {
     if(config.accelerationStructure.name == "BruteForce") {
         accelerationStructure = std::make_unique<rt::device::BruteForce>();
     } else if(config.accelerationStructure.name == "BVH") {
-
+        accelerationStructure = std::make_unique<rt::device::BVH>();
     } else if(config.accelerationStructure.name == "KDTree") {
 
     }
@@ -155,7 +156,7 @@ void DeviceMain(const Config& config) {
     );
 
     scene.LoadScene(config.scene);
-    scene.GenerateFrame(config.samplesPerPixel, config.maxDepth, 8, 8);
+    //scene.GenerateFrame(config.samplesPerPixel, config.maxDepth, 8, 8);
 }
 
 int main(int argc, char* argv[]) {

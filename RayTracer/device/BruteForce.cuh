@@ -9,6 +9,7 @@
 #pragma warning(pop)
 
 #include "IAccelerationStructure.cuh"
+#include "../Debug.h"
 
 namespace rt::device {
 
@@ -32,27 +33,6 @@ public:
             return result;
         }
 
-        __device__ void Test() override {
-            printf("Test\n");
-            for(int i = 0; i < m_raytracablesCount; i++) {
-                printf("Raytracable %d:\n", i);
-                for(int j = 0; j < m_raytracables[i].m_triangleCount; j++) {
-                    printf("%f ", m_raytracables[i].m_triangles[0].V0().x);
-                    printf("%f ", m_raytracables[i].m_triangles[0].V0().y);
-                    printf("%f\n", m_raytracables[i].m_triangles[0].V0().z);
-
-                    printf("%f ", m_raytracables[i].m_triangles[0].V1().x);
-                    printf("%f ", m_raytracables[i].m_triangles[0].V1().y);
-                    printf("%f\n", m_raytracables[i].m_triangles[0].V1().z);
-
-                    printf("%f ", m_raytracables[i].m_triangles[0].V2().x);
-                    printf("%f ", m_raytracables[i].m_triangles[0].V2().y);
-                    printf("%f\n\n", m_raytracables[i].m_triangles[0].V2().z);
-                }
-                
-            }
-        }
-
     private:
         size_t m_raytracablesCount;
         Mesh* m_raytracables;
@@ -60,7 +40,7 @@ public:
 
     ~BruteForce();
 
-    void PartitionSpace(const MeshList& raytracables);
+    void PartitionSpace(const MeshList& raytracables) override;
 
     DevicePtr ToDevice() const {
         return d_bruteForce;
@@ -80,27 +60,6 @@ __global__ void DeleteCameraDeviceObject(IAccelerationStructure::DevicePtr brute
     delete (*bruteForcePtr);
 }
 
-__global__ void FuckingTest(Triangle* d_triangles, size_t size) {
-    printf("Fucking test %d\n", size);
-    for(int i = 0; i < size; i++) {
-        printf("%f ",   d_triangles[i].V0().x);
-        printf("%f ",   d_triangles[i].V0().y);
-        printf("%f\n",  d_triangles[i].V0().z);
-
-        printf("%f ",   d_triangles[i].V1().x);
-        printf("%f ",   d_triangles[i].V1().y);
-        printf("%f\n",  d_triangles[i].V1().z);
-
-        printf("%f ",   d_triangles[i].V2().x);
-        printf("%f ",   d_triangles[i].V2().y);
-        printf("%f\n\n",d_triangles[i].V2().z);
-    }
-}
-
-__global__ void Test(IAccelerationStructure::DevicePtr bruteForcePtr) {
-    (*bruteForcePtr)->Test();
-}
-
 }
 
 void BruteForce::PartitionSpace(const MeshList& raytracables) {
@@ -117,7 +76,7 @@ void BruteForce::PartitionSpace(const MeshList& raytracables) {
         mesh.m_triangles = nullptr;
     }
 
-    CHECK_CUDA( cudaMalloc((void**)&d_bruteForce, sizeof(IAccelerationStructure)) );
+    CHECK_CUDA( cudaMalloc((void**)&d_bruteForce, sizeof(IAccelerationStructure::IDevice)) );
     CreateBruteForceDeviceObject<<<1, 1>>>(d_bruteForce, d_meshList, raytracables.size());
     CHECK_CUDA( cudaGetLastError() );
     CHECK_CUDA( cudaDeviceSynchronize() );

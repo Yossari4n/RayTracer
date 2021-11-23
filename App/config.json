@@ -18,11 +18,11 @@
         "fov": 20
     },
     "acceleration_structure": {
-        "name": "BruteForce"
+        "name": "BVH"
     },
     "render_target": {
         "name": "PPMTarget",
-        "width": 500,
-        "height": 500
+        "width": 400,
+        "height": 300
     } 
 }

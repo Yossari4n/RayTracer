@@ -14,6 +14,8 @@ set(
 	"Mesh.h"
 	"Material.h"
 	"Debug.h"
+	"BVHNode.h"
+	"BVHNode.cpp"
 	"tiny_obj_loader.h"
 
 	"host/Scene.h"
@@ -40,6 +42,7 @@ set(
 	"device/PPMTarget.cuh"
 	"device/IAccelerationStructure.cuh"
 	"device/BruteForce.cuh"
+	"device/BVH.cuh"
 )
 
 add_library(
