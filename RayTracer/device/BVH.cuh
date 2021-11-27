@@ -30,7 +30,43 @@ public:
             , m_nodes(nodes) {}
 
         __device__ Mesh::RayTraceResult FindClosestHit(const Ray& ray, float minTime, float maxTime, curandState* randState, Mesh::RayTraceRecord& record) const override {
-            return Mesh::RayTraceResult::Missed;
+            Mesh::RayTraceResult result = Mesh::RayTraceResult::Missed;
+            if(m_nodeCount == 0 || !m_nodes[0].m_volume.Hit(ray, minTime, maxTime)) {
+                return result;
+            }
+
+            int i = 0;
+            int leaf = 0;
+            while(i < m_nodeCount) {
+                if(m_nodes[i].m_volume.Hit(ray, minTime, maxTime)) {
+                    if(m_nodes[i].m_raytracable != nullptr) {
+                        if(const auto currResult = m_nodes[i].m_raytracable->RayTrace(ray, minTime, maxTime, randState, record); currResult != Mesh::RayTraceResult::Missed) {
+                            result = currResult;
+                            maxTime = record.m_time;
+                        }
+                    }
+                }
+
+                if(i == m_nodeCount - 1) {
+                    return result;
+                }
+
+                if(i < m_nodeCount / 2) {
+                    // Left node
+                    i = 2 * i + 1;
+                } else {
+                    // Right node
+                    int k = 1;
+                    while(true) {
+                        i = (i - 1) / 2;
+                        int p = k * 2;
+                        if(leaf % p == k - 1) break;
+                        k = p;
+                    }
+                    i = 2 * i + 2;
+                    leaf++;
+                }
+            }
         }
 
     private:

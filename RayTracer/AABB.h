@@ -30,13 +30,13 @@ public:
             float t0 = (min - origin) * inv_d;
             float t1 = (max - origin) * inv_d;
 
-            if(inv_d <= 0.0) {
+            if(inv_d < 0.0) {
                 Swap(t0, t1);
             }
 
             minTime = t0 > minTime ? t0 : minTime;
             maxTime = t1 < maxTime ? t1 : maxTime;
-            return maxTime > minTime;
+            return maxTime >= minTime;
         };
 
         return axis_test(m_min.x, m_max.x, ray.Origin().x, ray.Direction().x)

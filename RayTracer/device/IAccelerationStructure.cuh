@@ -28,11 +28,13 @@ public:
                 const Mesh::RayTraceResult result = FindClosestHit(currentRay, 0.01f, FLT_MAX, randState, record);
                 switch(result) {
                 case Mesh::RayTraceResult::Scattered:
+                    //printf("Scattered\n");
                     currentRay = record.m_scattered;
                     currentColor *= (record.m_attenuation + record.m_emitted);
                     break;
 
                 case Mesh::RayTraceResult::Emitted:
+                    //printf("Emitted\n");
                     return currentColor * record.m_emitted;
                     break;
 

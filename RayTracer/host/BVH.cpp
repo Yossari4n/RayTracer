@@ -16,8 +16,7 @@ Mesh::RayTraceResult BVH::InnerFindClosestHit(const BVHNode& node, const Ray& ra
     }
 
     if(node.m_raytracable) {
-        auto test = node.m_raytracable->RayTrace(ray, minTime, maxTime, record);
-        return test;
+        return node.m_raytracable->RayTrace(ray, minTime, maxTime, record);
     }
 
     Mesh::RayTraceResult result = Mesh::RayTraceResult::Missed;

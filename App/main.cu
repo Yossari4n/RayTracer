@@ -156,10 +156,54 @@ void DeviceMain(const Config& config) {
     );
 
     scene.LoadScene(config.scene);
-    //scene.GenerateFrame(config.samplesPerPixel, config.maxDepth, 8, 8);
+    scene.GenerateFrame(config.samplesPerPixel, config.maxDepth, 8, 8);
+}
+
+void test(int* tree, int size, int predicate) {
+    int i = 0;
+    int leaf = 0;
+    while(i < size) {
+        printf("check: %d\n", tree[i]);
+        int node = tree[i];
+        if(tree[i] == predicate) {
+            printf("found: %d\n", tree[i]);
+        }
+
+        if(i == size - 1) {
+            return;
+        }
+
+        if(i < (size / 2) && tree[2 * i + 1] < 10) { // not leaf
+            i = 2 * i + 1;
+        } else {
+            int k = 1;
+            while(true) {
+                i = (i - 1) / 2; // jump to the parent
+                int p = k * 2;
+                if(leaf % p == k - 1) break; // correct number of jumps found
+                k = p;
+            }
+            // after we jumped to the parent, go to the right child
+            i = 2 * i + 2;
+            leaf++; // next leaf, please
+
+            if(tree[2 * i + 1] >= 10 && tree[2 * i + 2] >= 10) {
+                return;
+            }
+        }
+    }
 }
 
 int main(int argc, char* argv[]) {
+
+    //int* arr = new int[]{ 1, 2, 3, 4, 5, 16, 17 };
+    //int* d_arr;
+    //cudaMalloc((void**)&d_arr, sizeof(int) * 7);
+    //cudaMemcpy(d_arr, arr, sizeof(int) * 7, cudaMemcpyHostToDevice);
+    ////test<<<1, 1>>>(d_arr, 7);
+    //test(arr, 7, 6);
+    //return;
+
     std::ifstream jsonFile(argv[1]);
     nlohmann::json configJson;
     jsonFile >> configJson;
