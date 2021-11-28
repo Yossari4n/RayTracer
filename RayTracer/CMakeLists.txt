@@ -16,6 +16,8 @@ set(
 	"Debug.h"
 	"BVHNode.h"
 	"BVHNode.cpp"
+	"KDTreeNode.h"
+	"KDTreeNode.cpp"
 	"tiny_obj_loader.h"
 
 	"host/Scene.h"
@@ -43,6 +45,7 @@ set(
 	"device/IAccelerationStructure.cuh"
 	"device/BruteForce.cuh"
 	"device/BVH.cuh"
+	"device/KDTree.cuh"
 )
 
 add_library(

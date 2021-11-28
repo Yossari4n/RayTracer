@@ -94,7 +94,7 @@ public:
         const unsigned int width = static_cast<unsigned int>(m_renderTarget->Width());
         const unsigned int height = static_cast<unsigned int>(m_renderTarget->Height());
         const unsigned int pixelsCount = width * height;
-        const Color missColor(1.0f);
+        const Color missColor(0.0f);
 
         const dim3 blocks(width / tx + 1, height / ty + 1);
         const dim3 threads(tx, ty);

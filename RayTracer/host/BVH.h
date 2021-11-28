@@ -9,14 +9,6 @@
 namespace rt {
 
 class BVH : public IAccelerationStructure {
-    struct Node {
-        std::unique_ptr<Mesh> m_raytracable;
-
-        AABB m_volume;
-        std::unique_ptr<Node> m_left;
-        std::unique_ptr<Node> m_right;
-    };
-
     struct AxisXComparator {
         bool operator()(const Mesh* lhs, const Mesh* rhs) {
             return lhs->Volume().Min().x < rhs->Volume().Min().x;

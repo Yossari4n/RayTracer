@@ -92,18 +92,18 @@ private:
             BVHDevice::Node d_node;
             d_node.m_volume = node->m_volume;
             if(node->m_raytracable) {
-                Mesh mesh(*node->m_raytracable.get());
-                CHECK_CUDA(cudaMalloc((void**)&mesh.m_triangles, sizeof(Triangle) * mesh.m_triangleCount));
-                CHECK_CUDA(cudaMemcpy(mesh.m_triangles, node->m_raytracable->m_triangles, sizeof(Triangle) * mesh.m_triangleCount, cudaMemcpyHostToDevice));
+                Mesh mesh = *node->m_raytracable;
+                CHECK_CUDA( cudaMalloc((void**)&mesh.m_triangles, sizeof(Triangle) * mesh.m_triangleCount) );
+                CHECK_CUDA( cudaMemcpy(mesh.m_triangles, node->m_raytracable->m_triangles, sizeof(Triangle) * mesh.m_triangleCount, cudaMemcpyHostToDevice) );
 
-                CHECK_CUDA(cudaMalloc(&d_node.m_raytracable, sizeof(Mesh)));
-                CHECK_CUDA(cudaMemcpy(d_node.m_raytracable, &mesh, sizeof(Mesh), cudaMemcpyHostToDevice));
+                CHECK_CUDA( cudaMalloc(&d_node.m_raytracable, sizeof(Mesh)) );
+                CHECK_CUDA( cudaMemcpy(d_node.m_raytracable, &mesh, sizeof(Mesh), cudaMemcpyHostToDevice) );
 
                 mesh.m_triangles = nullptr;
             } else {
                 d_node.m_raytracable = nullptr;
             }
-            CHECK_CUDA(cudaMemcpy(&d_array[index], &d_node, sizeof(BVHDevice::Node), cudaMemcpyHostToDevice));
+            CHECK_CUDA( cudaMemcpy(&d_array[index], &d_node, sizeof(BVHDevice::Node), cudaMemcpyHostToDevice) );
             index++;
 
             queue.pop();
@@ -134,7 +134,7 @@ __global__ void DeleteBVHDeviceObject(IAccelerationStructure::DevicePtr bvhPtr) 
 
 void BVH::PartitionSpace(const MeshList& raytracables) {
     BVHNode root(raytracables);
-    const unsigned int arraySize = std::pow(2U, root.m_depth) - 1;
+    const unsigned int arraySize = static_cast<unsigned int>(std::pow(2U, root.m_depth)) - 1U;
 
     BVHDevice::Node* d_meshTree;
     CHECK_CUDA( cudaMalloc(&d_meshTree, sizeof(BVHDevice::Node) * arraySize) );
