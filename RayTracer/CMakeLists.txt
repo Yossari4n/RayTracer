@@ -36,6 +36,8 @@ set(
 	"host/BVH.cpp"
 	"host/KDTree.h"
 	"host/KDTree.cpp"
+	"host/Metrics.h"
+	"host/Metrics.cpp"
 
 	"device/Scene.cuh"
 	"device/IRayGenerator.cuh"

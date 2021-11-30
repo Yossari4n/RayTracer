@@ -11,6 +11,7 @@ Mesh::RayTraceResult BVH::FindClosestHit(const Ray& ray, float minTime, float ma
 }
 
 Mesh::RayTraceResult BVH::InnerFindClosestHit(const BVHNode& node, const Ray& ray, float minTime, float maxTime, Mesh::RayTraceRecord& record) const {
+    Metrics::Instance().VolumeTested();
     if(!node.m_volume.Hit(ray, minTime, maxTime)) {
         return Mesh::RayTraceResult::Missed;
     }

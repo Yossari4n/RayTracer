@@ -45,11 +45,12 @@ void Scene::LoadScene(const std::string& path) {
     m_accelerationStructure->PartitionSpace(meshes);
 }
 
-void Scene::GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth) const {
+Metrics::Result Scene::GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth) const {
     const int width = static_cast<int>(m_renderTarget->Width());
     const int height = static_cast<int>(m_renderTarget->Height());
     const Color missColor(0.0f);
 
+    Metrics::Instance().Begin();
     for(int j = height - 1; j >= 0; j--) {
         LOG_INFO("Scanlines remaining: %d", j);
         LOG_FLUSH();
@@ -66,12 +67,15 @@ void Scene::GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth) c
                 color += m_accelerationStructure->Traverse(ray, maxDepth, missColor);
             }
 
-            m_renderTarget->WriteColor(i, height - j - 1, color, samplesPerPixel);
+            m_renderTarget->WriteColor(i, height - j - 1U, color, samplesPerPixel);
         }
     }
+    auto result = Metrics::Instance().End();
 
     LOG_INFO("\n");
     m_renderTarget->SaveBuffer();
+
+    return result;
 }
 
 }

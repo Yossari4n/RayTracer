@@ -1,4 +1,5 @@
 #include "IAccelerationStructure.h"
+#include "Metrics.h"
 
 namespace rt {
 
@@ -6,6 +7,8 @@ Color IAccelerationStructure::Traverse(const Ray& ray, unsigned int depth, const
     if(depth == 0) {
         return Color(0.0f);
     }
+
+    Metrics::Instance().RayCreated();
 
     Mesh::RayTraceRecord record{};
     const Mesh::RayTraceResult result = FindClosestHit(ray, 0.001f, FLT_MAX, record);

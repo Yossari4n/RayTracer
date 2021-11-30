@@ -10,6 +10,7 @@
 #include "Ray.h"
 #include "Triangle.h"
 #include "AABB.h"
+#include "host/Metrics.h"
 
 #include <vector>
 #include <memory>
@@ -142,8 +143,10 @@ public:
         for(int i = 0; i < m_triangleCount; i++) {
             const auto& triangle = m_triangles[i];
 
+            Metrics::Instance().TriangleTested();
             if(triangle.Hit(ray, minTime, closestHit.m_time, closestHit)) {
                 hitted = true;
+                Metrics::Instance().TriangleIntesected();
             }
         }
 

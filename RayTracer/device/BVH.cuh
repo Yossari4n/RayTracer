@@ -67,6 +67,8 @@ public:
                     leaf++;
                 }
             }
+
+            return result;
         }
 
     private:

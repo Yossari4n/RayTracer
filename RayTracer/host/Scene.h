@@ -4,6 +4,7 @@
 #include "IRayGenerator.h"
 #include "IAccelerationStructure.h"
 #include "IRenderTarget.h"
+#include "Metrics.h"
 
 #include <string>
 
@@ -14,7 +15,7 @@ public:
     Scene(IRayGenerator* rayGenerator, IAccelerationStructure* accelerationStructure, IRenderTarget* renderTarget);
 
     void LoadScene(const std::string& path);
-    void GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth) const;
+    Metrics::Result GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth) const;
 
 protected:
     IRayGenerator* m_rayGenerator;

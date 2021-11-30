@@ -13,6 +13,7 @@ Mesh::RayTraceResult KDTree::FindClosestHit(const Ray& ray, float minTime, float
 }
 
 Mesh::RayTraceResult KDTree::InnerFindClosestHit(const KDTreeNode& node, const Ray& ray, float minTime, float maxTime, Mesh::RayTraceRecord& record) const {
+    Metrics::Instance().VolumeTested();
     if(!node.m_volume.Hit(ray, minTime, maxTime)) {
         return Mesh::RayTraceResult::Missed;
     }

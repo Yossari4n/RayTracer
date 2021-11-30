@@ -30,6 +30,19 @@ void from_json(const nlohmann::json& j, glm::vec3& v) {
 
 }
 
+namespace rt {
+
+void to_json(nlohmann::json& j, const rt::Metrics::Result& result) {
+    j = nlohmann::json{
+        {"rays_created", result.m_rayCreations},
+        {"volumes_tested", result.m_volumeTests},
+        {"triangles_tested", result.m_triangleTests},
+        {"triangles_intersections", result.m_triangleIntersections}
+    };
+}
+
+}
+
 struct RayGeneratorConfig {
     std::string name;
     glm::vec3 position;
@@ -50,6 +63,7 @@ struct AccelerationStructureConfig {
 
 struct Config {
     std::string scene;
+    std::string metricsOutput;
     unsigned int samplesPerPixel;
     unsigned int maxDepth;
     bool cuda;
@@ -60,6 +74,7 @@ struct Config {
 
 void from_json(const nlohmann::json& json, Config& config) {
     json.at("scene").get_to(config.scene);
+    json.at("output_metrics").get_to(config.metricsOutput);
     json.at("samples_per_pixel").get_to(config.samplesPerPixel);
     json.at("max_depth").get_to(config.maxDepth);
     json.at("cuda").get_to(config.cuda);
@@ -118,7 +133,11 @@ void HostMain(const Config& config) {
     );
 
     scene.LoadScene(config.scene);
-    scene.GenerateFrame(config.samplesPerPixel, config.maxDepth);
+    auto result = scene.GenerateFrame(config.samplesPerPixel, config.maxDepth);
+
+    nlohmann::json jsonResult = result;
+    std::ofstream outputStream(config.metricsOutput);
+    outputStream << std::setw(4) << jsonResult << std::endl;
 }
 
 void DeviceMain(const Config& config) {

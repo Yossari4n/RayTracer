@@ -68,6 +68,8 @@ public:
                     leaf++;
                 }
             }
+
+            return result;
         }
 
     private:
@@ -103,7 +105,6 @@ private:
                     CHECK_CUDA( cudaMalloc((void**)&mesh.m_triangles, sizeof(Triangle) * mesh.m_triangleCount) );
                     CHECK_CUDA( cudaMemcpy(mesh.m_triangles, node->m_raytracables[i].m_triangles, sizeof(Triangle) * mesh.m_triangleCount, cudaMemcpyHostToDevice) );
 
-                    //CHECK_CUDA( cudaMalloc((void**)&d_node.m_raytracables[i], sizeof(Mesh)) );
                     CHECK_CUDA( cudaMemcpy(&d_node.m_raytracables[i], &mesh, sizeof(Mesh), cudaMemcpyHostToDevice) );
 
                     mesh.m_triangles = nullptr;

@@ -1,8 +1,9 @@
 {
     "scene": "..\\..\\Scenes\\cornell_box.obj",
+	"output_metrics": "result.json",
     "samples_per_pixel": 5,
     "max_depth": 10,
-    "cuda": true,
+    "cuda": false,
     "ray_generator": {
         "name": "Camera",
         "position": {
