@@ -15,7 +15,9 @@
 #define TINYOBJLOADER_IMPLEMENTATION 
 #include "../RayTracer/tiny_obj_loader.h"
 
+#pragma warning(push, 0)
 #include <nlohmann/json.hpp>
+#pragma warning(pop)
 
 #include <iostream>
 #include <string>
@@ -34,6 +36,7 @@ namespace rt {
 
 void to_json(nlohmann::json& j, const rt::Metrics::Result& result) {
     j = nlohmann::json{
+        {"time_elapsed", result.m_time},
         {"rays_created", result.m_rayCreations},
         {"volumes_tested", result.m_volumeTests},
         {"triangles_tested", result.m_triangleTests},
@@ -178,7 +181,11 @@ void DeviceMain(const Config& config) {
     );
 
     scene.LoadScene(config.scene);
-    scene.GenerateFrame(config.samplesPerPixel, config.maxDepth, 8, 8);
+    auto result = scene.GenerateFrame(config.samplesPerPixel, config.maxDepth, 8, 8);
+
+    nlohmann::json jsonResult = result;
+    std::ofstream outputStream(config.metricsOutput);
+    outputStream << std::setw(4) << jsonResult << std::endl;
 }
 
 int main(int argc, char* argv[]) {

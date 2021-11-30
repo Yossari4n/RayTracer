@@ -10,7 +10,7 @@
 #include "Ray.h"
 #include "Triangle.h"
 #include "AABB.h"
-#include "host/Metrics.h"
+#include "Metrics.h"
 
 #include <vector>
 #include <memory>

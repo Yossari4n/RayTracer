@@ -4,7 +4,7 @@
 #include "IRayGenerator.h"
 #include "IAccelerationStructure.h"
 #include "IRenderTarget.h"
-#include "Metrics.h"
+#include "../Metrics.h"
 
 #include <string>
 

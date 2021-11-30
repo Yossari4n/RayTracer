@@ -18,6 +18,8 @@ set(
 	"BVHNode.cpp"
 	"KDTreeNode.h"
 	"KDTreeNode.cpp"
+	"Metrics.h"
+	"Metrics.cpp"
 	"tiny_obj_loader.h"
 
 	"host/Scene.h"
@@ -36,8 +38,6 @@ set(
 	"host/BVH.cpp"
 	"host/KDTree.h"
 	"host/KDTree.cpp"
-	"host/Metrics.h"
-	"host/Metrics.cpp"
 
 	"device/Scene.cuh"
 	"device/IRayGenerator.cuh"

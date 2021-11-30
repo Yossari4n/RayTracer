@@ -4,6 +4,7 @@ namespace rt {
 
 void Metrics::Begin() {
     m_current = std::make_optional<Result>();
+    m_begin = std::chrono::steady_clock::now();
 }
 
 void Metrics::RayCreated() {
@@ -24,7 +25,7 @@ void Metrics::TriangleIntesected() {
 
 Metrics::Result Metrics::End() {
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    m_current->m_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - m_begin).count() / 1000.0f;
+    m_current->m_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - m_begin).count();
     return std::move(m_current).value();
 }
 

@@ -1,5 +1,5 @@
 #include "IAccelerationStructure.h"
-#include "Metrics.h"
+#include "..\Metrics.h"
 
 namespace rt {
 

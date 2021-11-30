@@ -13,6 +13,7 @@
 #include "IAccelerationStructure.cuh"
 #include "../Debug.h"
 #include "../Mesh.h"
+#include "../Metrics.h"
 
 namespace rt {
 
@@ -57,12 +58,12 @@ __global__ void GenerateFrameKernel(unsigned int samplesPerPixel, unsigned int m
 
 class Scene {
 public:
-    __host__ Scene(IRayGenerator* rayGenerator, IAccelerationStructure* accelerationStructure, IRenderTarget* renderTarget)
+    Scene(IRayGenerator* rayGenerator, IAccelerationStructure* accelerationStructure, IRenderTarget* renderTarget)
         : m_rayGenerator(rayGenerator)
         , m_accelerationStructure(accelerationStructure)
         , m_renderTarget(renderTarget) {}
 
-    __host__ void LoadScene(const std::string& path) {
+    void LoadScene(const std::string& path) {
         tinyobj::ObjReaderConfig config;
 
         tinyobj::ObjReader reader;
@@ -90,7 +91,7 @@ public:
         m_accelerationStructure->PartitionSpace(meshes);
     }
 
-    __host__ void GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth, unsigned int tx, unsigned int ty) const {
+    Metrics::Result GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth, unsigned int tx, unsigned int ty) const {
         const unsigned int width = static_cast<unsigned int>(m_renderTarget->Width());
         const unsigned int height = static_cast<unsigned int>(m_renderTarget->Height());
         const Color missColor(0.0f);
@@ -105,11 +106,15 @@ public:
         CHECK_CUDA( cudaGetLastError() );
         CHECK_CUDA( cudaDeviceSynchronize() );
 
+        Metrics::Instance().Begin();
         GenerateFrameKernel<<<blocks, threads>>>(samplesPerPixel, maxDepth, missColor, m_rayGenerator->ToDevice(), m_accelerationStructure->ToDevice(), m_renderTarget->ToDevice(), state);
         CHECK_CUDA( cudaGetLastError() );
         CHECK_CUDA( cudaDeviceSynchronize() );
+        auto result = Metrics::Instance().End();
 
         m_renderTarget->SaveBuffer();
+
+        return result;
     }
 
 private:

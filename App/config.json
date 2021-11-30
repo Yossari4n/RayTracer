@@ -1,9 +1,9 @@
 {
     "scene": "..\\..\\Scenes\\cornell_box.obj",
 	"output_metrics": "result.json",
-    "samples_per_pixel": 5,
+    "samples_per_pixel": 50,
     "max_depth": 10,
-    "cuda": false,
+    "cuda": true,
     "ray_generator": {
         "name": "Camera",
         "position": {
@@ -24,7 +24,7 @@
     },
     "render_target": {
         "name": "PPMTarget",
-        "width": 300,
-        "height": 400
+        "width": 400,
+        "height": 300
     } 
 }
