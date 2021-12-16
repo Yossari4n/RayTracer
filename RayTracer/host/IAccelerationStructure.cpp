@@ -5,7 +5,7 @@ namespace rt {
 
 Color IAccelerationStructure::Traverse(const Ray& ray, unsigned int depth, const Color& missColor) const {
     if(depth == 0) {
-        return Color(0.0f);
+        return Color(1.0f);
     }
 
     Metrics::Instance().RayCreated();

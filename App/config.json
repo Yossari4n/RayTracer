@@ -1,15 +1,21 @@
 {
     "scene": "..\\..\\Scenes\\cornell_box.obj",
-	"output_metrics": "result.json",
+    "output_metrics": "result.json",
+    "output_file": "result.ppm",
     "samples_per_pixel": 50,
-    "max_depth": 10,
+    "max_depth": 5,
     "cuda": true,
+    "miss_color": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+    },
     "ray_generator": {
         "name": "Camera",
         "position": {
             "x": 0.0,
             "y": 2.5,
-            "z": 25.0
+            "z": 20.0
         },
         "look_at": {
             "x": 0.0,
@@ -20,7 +26,7 @@
     },
     "acceleration_structure": {
         "name": "KDTree",
-		"depth": 5
+        "depth": 10
     },
     "render_target": {
         "name": "PPMTarget",

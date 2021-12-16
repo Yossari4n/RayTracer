@@ -1,11 +1,14 @@
 #include "KDTree.h"
+#include "../Debug.h"
 
 namespace rt {
 KDTree::KDTree(unsigned int maxDepth)
     : m_maxDepth(maxDepth) {}
 
 void KDTree::PartitionSpace(const MeshList& raytracables) {
+    LOG_INFO("Partition space\n");
     m_root = std::make_unique<KDTreeNode>(raytracables, m_maxDepth);
+    LOG_INFO("Space partitioned\n");
 }
 
 Mesh::RayTraceResult KDTree::FindClosestHit(const Ray& ray, float minTime, float maxTime, Mesh::RayTraceRecord& record) const {

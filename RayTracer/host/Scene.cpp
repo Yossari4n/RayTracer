@@ -36,19 +36,28 @@ void Scene::LoadScene(const std::string& path) {
     auto& shapes = reader.GetShapes();
     auto& materials = reader.GetMaterials();
 
+    tinyobj::material_t defaultMaterial;
+    defaultMaterial.diffuse[0] = 1.0f;
+    defaultMaterial.diffuse[1] = 1.0f;
+    defaultMaterial.diffuse[2] = 1.0f;
+
     std::vector<Mesh> meshes;
     meshes.reserve(shapes.size());
     for(const auto& shape : shapes) {
-        meshes.emplace_back(attrib, shape, materials[shape.mesh.material_ids[0]]);
+        if(materials.empty()) {
+            meshes.emplace_back(attrib, shape, defaultMaterial);
+        } else {
+            meshes.emplace_back(attrib, shape, materials[shape.mesh.material_ids[0]]);
+        }
     }
 
     m_accelerationStructure->PartitionSpace(meshes);
 }
 
-Metrics::Result Scene::GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth) const {
+Metrics::Result Scene::GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth, const Color& missColor) const {
+    LOG_INFO("Generate frame\n");
     const int width = static_cast<int>(m_renderTarget->Width());
     const int height = static_cast<int>(m_renderTarget->Height());
-    const Color missColor(0.0f);
 
     Metrics::Instance().Begin();
     for(int j = height - 1; j >= 0; j--) {
@@ -73,6 +82,7 @@ Metrics::Result Scene::GenerateFrame(unsigned int samplesPerPixel, unsigned int 
     auto result = Metrics::Instance().End();
 
     LOG_INFO("\n");
+    LOG_INFO("Frame generated\n");
     m_renderTarget->SaveBuffer();
 
     return result;

@@ -82,19 +82,28 @@ public:
         auto& shapes = reader.GetShapes();
         auto& materials = reader.GetMaterials();
 
+        tinyobj::material_t defaultMaterial;
+        defaultMaterial.diffuse[0] = 1.0f;
+        defaultMaterial.diffuse[1] = 1.0f;
+        defaultMaterial.diffuse[2] = 1.0f;
+
         std::vector<Mesh> meshes;
         meshes.reserve(shapes.size());
         for(const auto& shape : shapes) {
-            meshes.emplace_back(attrib, shape, materials[shape.mesh.material_ids[0]]);
+            if(materials.empty()) {
+                meshes.emplace_back(attrib, shape, defaultMaterial);
+            } else {
+                meshes.emplace_back(attrib, shape, materials[shape.mesh.material_ids[0]]);
+            }
         }
 
         m_accelerationStructure->PartitionSpace(meshes);
     }
 
-    Metrics::Result GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth, unsigned int tx, unsigned int ty) const {
+    Metrics::Result GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth, const Color& missColor, unsigned int tx, unsigned int ty) const {
+        LOG_INFO("Generate frame\n");
         const unsigned int width = static_cast<unsigned int>(m_renderTarget->Width());
         const unsigned int height = static_cast<unsigned int>(m_renderTarget->Height());
-        const Color missColor(0.0f);
 
         const dim3 blocks(width / tx + 1, height / ty + 1);
         const dim3 threads(tx, ty);
@@ -112,6 +121,7 @@ public:
         CHECK_CUDA( cudaDeviceSynchronize() );
         auto result = Metrics::Instance().End();
 
+        LOG_INFO("Frame generated\n");
         m_renderTarget->SaveBuffer();
 
         return result;

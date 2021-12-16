@@ -135,6 +135,7 @@ __global__ void DeleteBVHDeviceObject(IAccelerationStructure::DevicePtr bvhPtr) 
 }
 
 void BVH::PartitionSpace(const MeshList& raytracables) {
+    LOG_INFO("Partition space\n");
     BVHNode root(raytracables);
     const unsigned int arraySize = static_cast<unsigned int>(std::pow(2U, root.m_depth)) - 1U;
 
@@ -146,6 +147,7 @@ void BVH::PartitionSpace(const MeshList& raytracables) {
     CreateBVHDeviceObject<<<1, 1>>>(d_BVH, arraySize, d_meshTree);
     CHECK_CUDA( cudaGetLastError() );
     CHECK_CUDA( cudaDeviceSynchronize() );
+    LOG_INFO("Space partitioned\n");
 }
 
 }

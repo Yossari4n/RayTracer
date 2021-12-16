@@ -124,6 +124,7 @@ void PPMTarget::SaveBuffer() {
             << static_cast<int>(256 * glm::clamp(color.g, 0.0f, 0.999f)) << ' '
             << static_cast<int>(256 * glm::clamp(color.b, 0.0f, 0.999f)) << '\n';
     }
+    LOG_INFO("Buffer saved\n");
 }
 
 }

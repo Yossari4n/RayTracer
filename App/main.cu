@@ -67,9 +67,11 @@ struct AccelerationStructureConfig {
 struct Config {
     std::string scene;
     std::string metricsOutput;
+    std::string outputFile;
     unsigned int samplesPerPixel;
     unsigned int maxDepth;
     bool cuda;
+    rt::Color missColor;
     RayGeneratorConfig rayGenerator;
     AccelerationStructureConfig accelerationStructure;
     RenderTargetConfig renderTarget;
@@ -78,9 +80,11 @@ struct Config {
 void from_json(const nlohmann::json& json, Config& config) {
     json.at("scene").get_to(config.scene);
     json.at("output_metrics").get_to(config.metricsOutput);
+    json.at("output_file").get_to(config.outputFile);
     json.at("samples_per_pixel").get_to(config.samplesPerPixel);
     json.at("max_depth").get_to(config.maxDepth);
     json.at("cuda").get_to(config.cuda);
+    json.at("miss_color").get_to(config.missColor);
 
     const auto& rayGenerator = json.at("ray_generator");
     rayGenerator.at("name").get_to(config.rayGenerator.name);
@@ -136,7 +140,7 @@ void HostMain(const Config& config) {
     );
 
     scene.LoadScene(config.scene);
-    auto result = scene.GenerateFrame(config.samplesPerPixel, config.maxDepth);
+    auto result = scene.GenerateFrame(config.samplesPerPixel, config.maxDepth, config.missColor);
 
     nlohmann::json jsonResult = result;
     std::ofstream outputStream(config.metricsOutput);
@@ -181,7 +185,7 @@ void DeviceMain(const Config& config) {
     );
 
     scene.LoadScene(config.scene);
-    auto result = scene.GenerateFrame(config.samplesPerPixel, config.maxDepth, 8, 8);
+    auto result = scene.GenerateFrame(config.samplesPerPixel, config.maxDepth, config.missColor, 8, 8);
 
     nlohmann::json jsonResult = result;
     std::ofstream outputStream(config.metricsOutput);
@@ -197,7 +201,12 @@ int main(int argc, char* argv[]) {
     std::ifstream jsonFile(argv[1]);
     nlohmann::json configJson;
     jsonFile >> configJson;
+    jsonFile.close();
+
     Config config = configJson.get<Config>();
+    std::ofstream out(config.outputFile);
+    std::streambuf* coutBuffer = std::cout.rdbuf();
+    std::cout.rdbuf(out.rdbuf());
 
     if(!config.cuda) {
         HostMain(config);
