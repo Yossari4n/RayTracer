@@ -1,0 +1,36 @@
+{
+    "scene": "..\\..\\Scenes\\lucy.obj",
+    "output_metrics": "lucy_result.json",
+    "output_file": "lucy_result.ppm",
+    "samples_per_pixel": 100,
+    "max_depth": 25,
+    "cuda": true,
+    "miss_color": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+    },
+    "ray_generator": {
+        "name": "Camera",
+        "position": {
+            "x": 0.0,
+            "y": 2.5,
+            "z": 20.0
+        },
+        "look_at": {
+            "x": 0.0,
+            "y": 2.5,
+            "z": 0.0
+        },
+        "fov": 20
+    },
+    "acceleration_structure": {
+        "name": "KDTree",
+        "depth": 10
+    },
+    "render_target": {
+        "name": "PPMTarget",
+        "width": 400,
+        "height": 300
+    }
+}
