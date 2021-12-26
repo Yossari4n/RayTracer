@@ -1,12 +1,16 @@
 # RayTracer
 
 ## Scenes
-![Screenshot](cornell_box_result.jpg?raw=true "Cornell box")
+<p float="left">
+  <img src="/cornell_box_result.jpg" width="100" />
+  <img src="/dragon_result.jpg" width="100" /> 
+  <img src="/lucy_result.jpg" width="100" />
+</p>
 
-![Screenshot](dragon_result.jpg?raw=true "Dragon")
+<p float="left">
+  <img src="/square_fractal_result.jpg" width="100" />
+</p>
 
-![Screenshot](lucy_result.jpg?raw=true "Lucy")
-
-![Screenshot](square_fractal_result.jpg?raw=true "Square fractal")
-
-![Screenshot](sponza_result.jpg?raw=true "Sponza")
+<p float="left">
+  <img src="/sponza_result.jpg" width="100" />
+</p>
