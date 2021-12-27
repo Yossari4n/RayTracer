@@ -1,5 +1,15 @@
 # RayTracer
 
+## Download
+RayTracer uses CMake build system to build framework.
+
+    git clone https://github.com/Yossari4n/RayTracer.git
+    cd RayTracer
+    mkdir build && cd build
+    conan install ..
+    cmake .. -G
+
+
 ## Scenes
 <p float="left">
   <img src="/cornell_box_result.jpg" width="250" />
