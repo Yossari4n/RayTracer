@@ -101,7 +101,7 @@ public:
     }
 
     Metrics::Result GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth, const Color& missColor, unsigned int tx, unsigned int ty) const {
-        LOG_INFO("Generate frame\n");
+        LOG_INFO("Generating frame\n");
         const unsigned int width = static_cast<unsigned int>(m_renderTarget->Width());
         const unsigned int height = static_cast<unsigned int>(m_renderTarget->Height());
 

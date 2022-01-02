@@ -203,7 +203,14 @@ int main(int argc, char* argv[]) {
     jsonFile >> configJson;
     jsonFile.close();
 
-    Config config = configJson.get<Config>();
+    Config config{};
+    try {
+         config = configJson.get<Config>();
+    } catch(const std::exception& error) {
+        std::cerr << "Failed to read json config\n" << error.what();
+        return EXIT_FAILURE;
+    }
+    
     std::ofstream out(config.outputFile);
     std::streambuf* coutBuffer = std::cout.rdbuf();
     std::cout.rdbuf(out.rdbuf());

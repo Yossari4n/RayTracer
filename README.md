@@ -19,8 +19,11 @@ RayTracer uses CMake build system to build framework.
 
 <p float="left">
   <img src="/square_fractal_result.jpg" width="250" />
+  <img src="/delta_fractal_result.jpg" width="250" />
+  <img src="/sierpinski_fractal_result.jpg" width="250" />
 </p>
 
 <p float="left">
   <img src="/sponza_result.jpg" width="250" />
+  <img src="/sibenik_result.jpg" width="250" />
 </p>
