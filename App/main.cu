@@ -17,35 +17,16 @@
 
 #pragma warning(push, 0)
 #include <nlohmann/json.hpp>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #pragma warning(pop)
 
 #include <iostream>
 #include <string>
+#include <assert.h>
 
-namespace glm {
-
-void from_json(const nlohmann::json& j, glm::vec3& v) {
-    j.at("x").get_to(v.x);
-    j.at("y").get_to(v.y);
-    j.at("z").get_to(v.z);
-}
-
-}
-
-namespace rt {
-
-void to_json(nlohmann::json& j, const rt::Metrics::Result& result) {
-    j = nlohmann::json{
-        {"time_elapsed", result.m_time},
-        {"rays_created", result.m_rayCreations},
-        {"volumes_tested", result.m_volumeTests},
-        {"triangles_tested", result.m_triangleTests},
-        {"triangles_intersections", result.m_triangleIntersections}
-    };
-}
-
-}
-
+//-----------------------------------------------------------------------------------
+// Config
 struct RayGeneratorConfig {
     std::string name;
     glm::vec3 position;
@@ -77,6 +58,32 @@ struct Config {
     RenderTargetConfig renderTarget;
 };
 
+//-----------------------------------------------------------------------------------
+// Json
+namespace glm {
+
+void from_json(const nlohmann::json& j, glm::vec3& v) {
+    j.at("x").get_to(v.x);
+    j.at("y").get_to(v.y);
+    j.at("z").get_to(v.z);
+}
+
+}
+
+namespace rt {
+
+void to_json(nlohmann::json& j, const rt::Metrics::Result& result) {
+    j = nlohmann::json{
+        {"time_elapsed", result.m_time},
+        {"rays_created", result.m_rayCreations},
+        {"volumes_tested", result.m_volumeTests},
+        {"triangles_tested", result.m_triangleTests},
+        {"triangles_intersections", result.m_triangleIntersections}
+    };
+}
+
+}
+
 void from_json(const nlohmann::json& json, Config& config) {
     json.at("scene").get_to(config.scene);
     json.at("output_metrics").get_to(config.metricsOutput);
@@ -102,6 +109,68 @@ void from_json(const nlohmann::json& json, Config& config) {
     renderTarget.at("height").get_to(config.renderTarget.height);
 }
 
+//-----------------------------------------------------------------------------------
+// OpenGL
+class Renderer {
+public:
+    Renderer(size_t width, size_t height, const std::string& title)
+        : m_width(width)
+        , m_height(height)
+        , m_title(title) {
+        glfwInit();
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+        glfwWindowHint(GLFW_SAMPLES, 4);
+
+        m_handle = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
+        glfwSetWindowUserPointer(m_handle, this);
+        glfwSetWindowTitle(m_handle, title.c_str());
+
+        glfwMakeContextCurrent(m_handle);
+        glfwSetFramebufferSizeCallback(m_handle, Renderer::FramebufferSizeCallback);
+
+        if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+            return;
+        }
+
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_MULTISAMPLE);
+    }
+
+    ~Renderer() {
+        glfwTerminate();
+    }
+
+    Renderer(const Renderer&) = delete;
+    Renderer& operator=(const Renderer&) = delete;
+
+    void StartRenderLoop() const {
+        while(!glfwWindowShouldClose(m_handle)) {
+            glfwPollEvents();
+           // drawing
+            glfwSwapBuffers(m_handle);
+        }
+    }
+
+private:
+    static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
+
+    size_t m_width;
+    size_t m_height;
+    std::string m_title;
+    GLFWwindow* m_handle{ nullptr };
+};
+
+void Renderer::FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
+    auto renderer = static_cast<Renderer*>(glfwGetWindowUserPointer(window));
+    renderer->m_width = width;
+    renderer->m_height = height;
+    glViewport(0, 0, width, height);
+}
+
+//-----------------------------------------------------------------------------------
+// 
 void HostMain(const Config& config) {
     std::unique_ptr<rt::IRayGenerator> rayGenerator;
     if(config.rayGenerator.name == "Camera") {
@@ -193,6 +262,10 @@ void DeviceMain(const Config& config) {
 }
 
 int main(int argc, char* argv[]) {
+    Renderer renderer(800, 600, "Test");
+    renderer.StartRenderLoop();
+
+    return;
     if(argc < 2) {
         std::cerr << "No config file provided\n";
         return EXIT_FAILURE;
