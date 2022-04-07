@@ -1,0 +1,36 @@
+{
+    "scene": "..\\..\\Scenes\\dragon.obj",
+    "output_metrics": "dragon_kdtree_result.json",
+    "output_file": "dragon_kdtree_result.ppm",
+    "samples_per_pixel": 25,
+    "max_depth": 5,
+    "cuda": false,
+    "miss_color": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+    },
+    "ray_generator": {
+        "name": "Camera",
+        "position": {
+            "x": 0.0,
+            "y": 2.5,
+            "z": 20.0
+        },
+        "look_at": {
+            "x": 0.0,
+            "y": 2.5,
+            "z": 0.0
+        },
+        "fov": 20
+    },
+    "acceleration_structure": {
+        "name": "KDTree",
+        "depth": 10
+    },
+    "render_target": {
+        "name": "PPMTarget",
+        "width": 100,
+        "height": 100
+    }
+}

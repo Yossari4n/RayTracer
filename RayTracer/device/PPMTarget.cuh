@@ -12,14 +12,15 @@ class PPMTarget : public IRenderTarget {
 public:
     class DevicePPMTarget : public IRenderTarget::IDevice {
     public:
-        __device__ DevicePPMTarget(size_t width, size_t height)
+        __device__ DevicePPMTarget(size_t width, size_t height, Color* frameBuffer)
             : m_width(width)
-            , m_height(height) {
-            m_frameBuffer = new Color[m_width * m_height];
+            , m_height(height)
+            , m_frameBuffer(frameBuffer) {
+            //m_frameBuffer = new Color[m_width * m_height];
         }
 
         __device__ ~DevicePPMTarget() {
-            delete[] m_frameBuffer;
+            //delete[] m_frameBuffer;
         }
 
         __device__ void WriteColor(size_t x, size_t y, const Color& color, unsigned int samplesPerPixel) override {
@@ -76,8 +77,8 @@ private:
 
 namespace {
 
-__global__ void CreatePPMTargetDeviceObject(IRenderTarget::DevicePtr d_target, size_t width, size_t height) {
-    (*d_target) = new PPMTarget::DevicePPMTarget(width, height);
+__global__ void CreatePPMTargetDeviceObject(IRenderTarget::DevicePtr d_target, size_t width, size_t height, Color* frameBuffer) {
+    (*d_target) = new PPMTarget::DevicePPMTarget(width, height, frameBuffer);
 }
 
 __global__ void DeletePPMTargetDeviceObject(IRenderTarget::DevicePtr d_target) {
@@ -95,8 +96,11 @@ __global__ void CopyFrameBuffer(IRenderTarget::DevicePtr d_target, Color* frameB
 PPMTarget::PPMTarget(size_t width, size_t height)
     : m_width(width)
     , m_height(height) {
+    Color* d_frameBuffer;
+    CHECK_CUDA( cudaMalloc(&d_frameBuffer, sizeof(Color) * m_width * m_height) );
+
     CHECK_CUDA( cudaMalloc((void**)&d_target, sizeof(IRenderTarget)) );
-    CreatePPMTargetDeviceObject<<<1, 1>>>(d_target, m_width, m_height);
+    CreatePPMTargetDeviceObject<<<1, 1>>>(d_target, m_width, m_height, d_frameBuffer);
     CHECK_CUDA( cudaGetLastError() );
     CHECK_CUDA( cudaDeviceSynchronize() );
 }

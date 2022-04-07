@@ -11,7 +11,7 @@ set(
 	"Ray.h"
 	"Triangle.h"
 	"AABB.h"
-	"Mesh.h"
+	"Mesh.cuh"
 	"Material.h"
 	"Debug.h"
 	"BVHNode.h"

@@ -1,7 +1,7 @@
 #ifndef BVHNode_h
 #define BVHNode_h
 
-#include "Mesh.h"
+#include "Mesh.cuh"
 #include "AABB.h"
 
 #include <memory>

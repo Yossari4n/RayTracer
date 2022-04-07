@@ -1,0 +1,36 @@
+{
+    "scene": "..\\..\\Scenes\\sibenik\\sibenik.obj",
+    "output_metrics": "sibenik_bf_result.json",
+    "output_file": "sibenik_bf_result.ppm",
+    "samples_per_pixel": 1,
+    "max_depth": 1,
+    "cuda": false,
+    "miss_color": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+    },
+    "ray_generator": {
+        "name": "Camera",
+        "position": {
+            "x": -17.5,
+            "y": -7.5,
+            "z": 0.0
+        },
+        "look_at": {
+            "x": 0.0,
+            "y": -12.5,
+            "z": 0.0
+        },
+        "fov": 20
+    },
+    "acceleration_structure": {
+        "name": "BruteForce",
+        "depth": 0
+    },
+    "render_target": {
+        "name": "PPMTarget",
+        "width": 1200,
+        "height": 1024
+    }
+}

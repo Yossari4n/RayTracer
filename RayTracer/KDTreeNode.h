@@ -1,7 +1,7 @@
 #ifndef KDTreeNode_h
 #define KDTreeNode_h
 
-#include "Mesh.h"
+#include "Mesh.cuh"
 #include "AABB.h"
 
 namespace rt {

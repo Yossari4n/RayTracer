@@ -99,7 +99,7 @@ void from_json(const nlohmann::json& json, Config& config) {
     const auto& renderTarget = json.at("render_target");
     renderTarget.at("name").get_to(config.renderTarget.name);
     renderTarget.at("width").get_to(config.renderTarget.width);
-    renderTarget.at("width").get_to(config.renderTarget.height);
+    renderTarget.at("height").get_to(config.renderTarget.height);
 }
 
 void HostMain(const Config& config) {

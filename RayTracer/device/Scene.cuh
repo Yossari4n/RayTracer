@@ -12,7 +12,7 @@
 #include "IRenderTarget.cuh"
 #include "IAccelerationStructure.cuh"
 #include "../Debug.h"
-#include "../Mesh.h"
+#include "../Mesh.cuh"
 #include "../Metrics.h"
 
 namespace rt {
