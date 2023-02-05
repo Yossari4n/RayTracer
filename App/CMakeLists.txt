@@ -5,7 +5,7 @@ set(APP_SOURCE_DIRECTORY "${APP_MODULE_DIRECTORY}")
 
 add_executable(
 	${APP_NAME}
-	main.cpp
+	main.cu
 )
 
 target_link_libraries(${APP_NAME} ${LIBRARY_NAME})

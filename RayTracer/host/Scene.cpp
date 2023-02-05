@@ -20,10 +20,11 @@ Scene::Scene(IRayGenerator* rayGenerator, IAccelerationStructure* accelerationSt
 void Scene::LoadScene(const std::string& path) {
     tinyobj::ObjReaderConfig config;
 
+    LOG_INFO("Loading scene %s\n", path.c_str());
     tinyobj::ObjReader reader;
     if(!reader.ParseFromFile(path, config)) {
         if(!reader.Error().empty()) {
-            LOG_ERROR("Failed to load scene %s\n", path.c_str());
+            LOG_ERROR("Failed to load scene\n");
         }
         return;
     }
@@ -51,14 +52,15 @@ void Scene::LoadScene(const std::string& path) {
         }
     }
 
+    LOG_INFO("Partitioning space\n");
     m_accelerationStructure->PartitionSpace(meshes);
 }
 
 Metrics::Result Scene::GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth, const Color& missColor) const {
-    LOG_INFO("Generate frame\n");
     const int width = static_cast<int>(m_renderTarget->Width());
     const int height = static_cast<int>(m_renderTarget->Height());
 
+    LOG_INFO("Generating %d x %d frame\n", width, height);
     Metrics::Instance().Begin();
     for(int j = height - 1; j >= 0; j--) {
         LOG_INFO("Scanlines remaining: %d", j);
@@ -82,7 +84,7 @@ Metrics::Result Scene::GenerateFrame(unsigned int samplesPerPixel, unsigned int 
     auto result = Metrics::Instance().End();
 
     LOG_INFO("\n");
-    LOG_INFO("Frame generated\n");
+    LOG_INFO("Saving buffer to standard output\n");
     m_renderTarget->SaveBuffer();
 
     return result;

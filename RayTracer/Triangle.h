@@ -25,7 +25,7 @@ public:
         float m_time;
     };
 
-    RT_DEVICE RT_HOST Triangle() = default;
+    Triangle() = default;
 
     RT_DEVICE RT_HOST Triangle(const Point3& v1, const Point3& v2, const Point3& v3)
         : m_v0(v1)

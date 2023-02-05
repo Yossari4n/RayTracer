@@ -36,7 +36,11 @@ struct RayGeneratorConfig {
     std::string name;
     glm::vec3 position;
     glm::vec3 lookAt;
+    glm::vec3 up;
     float fov;
+    float aspectRatio;
+    float aperture;
+    float focusDistance;
 };
 
 struct RenderTargetConfig {
@@ -89,20 +93,38 @@ void to_json(nlohmann::json& j, const rt::Metrics::Result& result) {
 
 }
 
+std::ostream& operator<<(std::ostream& os, const glm::vec3 vec) {
+    os << vec.x << ", " << vec.y << ", " << vec.z;
+    return os;
+}
+
+template<class T>
+T OptionalJsonValue(const nlohmann::json& json, const std::string& key, T fallback) {
+    if(json.find(key) == json.end() ) {
+        std::cerr<< "[Warning] Property \"" << key << "\" not found, used fallback \"" << fallback << "\" instead.\n";
+    }
+
+    return json.value(key, fallback);
+}
+
 void from_json(const nlohmann::json& json, Config& config) {
     json.at("scene").get_to(config.scene);
-    json.at("output_metrics").get_to(config.metricsOutput);
+    config.metricsOutput = OptionalJsonValue(json, "output_metrics", std::string{});
     json.at("output_file").get_to(config.outputFile);
     json.at("samples_per_pixel").get_to(config.samplesPerPixel);
     json.at("max_depth").get_to(config.maxDepth);
-    json.at("cuda").get_to(config.cuda);
+    config.maxDepth = OptionalJsonValue(json, "cuda", false);
     json.at("miss_color").get_to(config.missColor);
 
     const auto& rayGenerator = json.at("ray_generator");
     rayGenerator.at("name").get_to(config.rayGenerator.name);
     rayGenerator.at("position").get_to(config.rayGenerator.position);
     rayGenerator.at("look_at").get_to(config.rayGenerator.lookAt);
+    config.rayGenerator.up = OptionalJsonValue(rayGenerator, "up", glm::vec3{ 1.0f, 0.0f, 0.0f} );
     rayGenerator.at("fov").get_to(config.rayGenerator.fov);
+    config.rayGenerator.aspectRatio = OptionalJsonValue(rayGenerator, "aspect_ratio", 16.0f / 9.0f );
+    config.rayGenerator.aperture = OptionalJsonValue(rayGenerator, "asperture", 0.1f);
+    config.rayGenerator.focusDistance = OptionalJsonValue(rayGenerator, "focus_distance", 10.0f);
 
     const auto& accelerationStructure = json.at("acceleration_structure");
     accelerationStructure.at("name").get_to(config.accelerationStructure.name);
@@ -122,11 +144,11 @@ void HostMain(const Config& config) {
         rayGenerator = std::make_unique<rt::Camera>(
             config.rayGenerator.position,
             config.rayGenerator.lookAt,
-            rt::Vector3(0.0f, 1.0f, 0.0f),      // up
+            config.rayGenerator.up,
             config.rayGenerator.fov,
-            16.0f / 9.0f,                       // aspect ratio
-            0.1f,                               // aperture
-            10.0f                               // focus_distance
+            config.rayGenerator.aspectRatio,
+            config.rayGenerator.aperture,
+            config.rayGenerator.focusDistance
         );
     }
 
@@ -137,6 +159,9 @@ void HostMain(const Config& config) {
         accelerationStructure = std::make_unique<rt::BVH>();
     } else if(config.accelerationStructure.name == "KDTree") {
         accelerationStructure = std::make_unique<rt::KDTree>(config.accelerationStructure.depth);
+    } else {
+        std::cerr << "[Error] No valid acceleration structure provided\n";
+        return;
     }
 
     std::unique_ptr<rt::IRenderTarget> renderTarget;
@@ -145,6 +170,9 @@ void HostMain(const Config& config) {
             config.renderTarget.width,
             config.renderTarget.height
         );
+    } else {
+        std::cerr << "[Error] No valid redner target provided\n";
+        return;
     }
 
     rt::Scene scene(
@@ -156,61 +184,71 @@ void HostMain(const Config& config) {
     scene.LoadScene(config.scene);
     auto result = scene.GenerateFrame(config.samplesPerPixel, config.maxDepth, config.missColor);
 
-    nlohmann::json jsonResult = result;
-    std::ofstream outputStream(config.metricsOutput);
-    outputStream << std::setw(4) << jsonResult << std::endl;
+    if(!config.metricsOutput.empty()) {
+        std::ofstream outputStream(config.metricsOutput);
+        outputStream << std::setw(4) << nlohmann::json{result} << std::endl;
+    }
 }
 
 #ifdef RT_CUDA_ENABLED
-    void DeviceMain(const Config& config) {
-        std::unique_ptr<rt::device::IRayGenerator> rayGenerator;
-        if(config.rayGenerator.name == "Camera") {
-            rayGenerator = std::make_unique<rt::device::Camera>(
-                config.rayGenerator.position,
-                config.rayGenerator.lookAt,
-                rt::Vector3(0.0f, 1.0f, 0.0f),      // up
-                config.rayGenerator.fov,
-                16.0f / 9.0f,                       // aspect ratio
-                0.1f,                               // aperture
-                10.0f                               // focus_distance
-            );
-        }
-    
-        std::unique_ptr<rt::device::IAccelerationStructure> accelerationStructure;
-        if(config.accelerationStructure.name == "BruteForce") {
-            accelerationStructure = std::make_unique<rt::device::BruteForce>();
-        } else if(config.accelerationStructure.name == "BVH") {
-            accelerationStructure = std::make_unique<rt::device::BVH>();
-        } else if(config.accelerationStructure.name == "KDTree") {
-            accelerationStructure = std::make_unique<rt::device::KDTree>(config.accelerationStructure.depth);
-        }
-    
-        std::unique_ptr<rt::device::IRenderTarget> renderTarget;
-        if(config.renderTarget.name == "PPMTarget") {
-            renderTarget = std::make_unique<rt::device::PPMTarget>(
-                config.renderTarget.width,
-                config.renderTarget.height
-            );
-        }
-    
-        rt::device::Scene scene(
-            rayGenerator.get(),
-            accelerationStructure.get(),
-            renderTarget.get()
+void DeviceMain(const Config& config) {
+    std::unique_ptr<rt::device::IRayGenerator> rayGenerator;
+    if(config.rayGenerator.name == "Camera") {
+        rayGenerator = std::make_unique<rt::device::Camera>(
+            config.rayGenerator.position,
+            config.rayGenerator.lookAt,
+            config.rayGenerator.up,
+            config.rayGenerator.fov,
+            config.rayGenerator.aspectRatio,
+            config.rayGenerator.aperture,
+            config.rayGenerator.focusDistance
         );
-    
-        scene.LoadScene(config.scene);
-        auto result = scene.GenerateFrame(config.samplesPerPixel, config.maxDepth, config.missColor, 8, 8);
-    
-        nlohmann::json jsonResult = result;
-        std::ofstream outputStream(config.metricsOutput);
-        outputStream << std::setw(4) << jsonResult << std::endl;
     }
+
+    std::unique_ptr<rt::device::IAccelerationStructure> accelerationStructure;
+    if(config.accelerationStructure.name == "BruteForce") {
+        accelerationStructure = std::make_unique<rt::device::BruteForce>();
+    } else if(config.accelerationStructure.name == "BVH") {
+        accelerationStructure = std::make_unique<rt::device::BVH>();
+    } else if(config.accelerationStructure.name == "KDTree") {
+        accelerationStructure = std::make_unique<rt::device::KDTree>(config.accelerationStructure.depth);
+    } else {
+        std::cerr << "[Error] No valid acceleration structure provided\n";
+        return;
+    }
+
+    std::unique_ptr<rt::device::IRenderTarget> renderTarget;
+    if(config.renderTarget.name == "PPMTarget") {
+        renderTarget = std::make_unique<rt::device::PPMTarget>(
+            config.renderTarget.width,
+            config.renderTarget.height
+        );
+    } else {
+        std::cerr << "[Error] No valid redner target provided\n";
+        return;
+    }
+
+    rt::device::Scene scene(
+        rayGenerator.get(),
+        accelerationStructure.get(),
+        renderTarget.get()
+    );
+
+    scene.LoadScene(config.scene);
+    auto result = scene.GenerateFrame(config.samplesPerPixel, config.maxDepth, config.missColor, 8, 8);
+
+    if(!config.metricsOutput.empty()) {
+        std::ofstream outputStream(config.metricsOutput);
+        outputStream << std::setw(4) << nlohmann::json{ result } << std::endl;
+    }
+}
 #endif
 
 int main(int argc, char* argv[]) {
+    std::cerr << "RayTracer alpha\n";
+
     if(argc < 2) {
-        std::cerr << "No config file provided\n";
+        std::cerr << "[Error] No config file provided\n";
         return EXIT_FAILURE;
     }
 
@@ -221,9 +259,10 @@ int main(int argc, char* argv[]) {
 
     Config config{};
     try {
-         config = configJson.get<Config>();
+        std::cerr << "[Info] Reading config file: " << argv[1] << '\n';
+        config = configJson.get<Config>();
     } catch(const std::exception& error) {
-        std::cerr << "Failed to read json config\n" << error.what();
+        std::cerr << "[Error] Failed to read json config\n" << error.what();
         return EXIT_FAILURE;
     }
     

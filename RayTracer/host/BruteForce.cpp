@@ -4,9 +4,7 @@
 namespace rt {
 
 void BruteForce::PartitionSpace(const MeshList& raytracables) {
-    LOG_INFO("Partition space\n");
     m_rayTracables = raytracables;
-    LOG_INFO("Space partitioned\n");
 }
 
 Mesh::RayTraceResult BruteForce::FindClosestHit(const Ray& ray, float minTime, float maxTime, Mesh::RayTraceRecord& record) const {

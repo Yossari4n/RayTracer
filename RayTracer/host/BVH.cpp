@@ -4,9 +4,7 @@
 namespace rt {
 
 void BVH::PartitionSpace(const MeshList& raytracables) {
-    LOG_INFO("Partition space\n");
     m_root = std::make_unique<BVHNode>(raytracables);
-    LOG_INFO("Space partitioned\n");
 }
 
 Mesh::RayTraceResult BVH::FindClosestHit(const Ray& ray, float minTime, float maxTime, Mesh::RayTraceRecord& record) const {

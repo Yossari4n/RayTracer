@@ -19,8 +19,6 @@ void PPMTarget::WriteColor(size_t x, size_t y, const Color& color, unsigned int 
 }
 
 void PPMTarget::SaveBuffer() {
-    LOG_INFO("Saving buffer\n");
-
     std::cout << "P3\n" << m_width << ' ' << m_height << "\n255\n";
 
     const size_t size = m_width * m_height;
@@ -31,8 +29,6 @@ void PPMTarget::SaveBuffer() {
             << static_cast<int>(256 * glm::clamp(color.g, 0.0f, 0.999f)) << ' '
             << static_cast<int>(256 * glm::clamp(color.b, 0.0f, 0.999f)) << '\n';
     }
-
-    LOG_INFO("Buffer saved\n");
 }
 
 

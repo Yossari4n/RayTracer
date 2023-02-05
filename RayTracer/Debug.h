@@ -14,9 +14,9 @@
 
 #include <iostream>
 
-#define LOG_ERROR(...) do { fprintf(stderr, "\r[%s][Error] ", __func__); fprintf(stderr, __VA_ARGS__); } while(0)
-#define LOG_WARNING( ...) do { fprintf(stderr, "\r[%s][Warning] ", __func__); fprintf(stderr, __VA_ARGS__); } while(0)
-#define LOG_INFO(...) do { fprintf(stderr, "\r[%s][Info] ", __func__); fprintf(stderr, __VA_ARGS__); } while(0)
+#define LOG_ERROR(...) do { fprintf(stderr, "\r[Error] "); fprintf(stderr, __VA_ARGS__); } while(0)
+#define LOG_WARNING( ...) do { fprintf(stderr, "\r[Warning] "); fprintf(stderr, __VA_ARGS__); } while(0)
+#define LOG_INFO(...) do { fprintf(stderr, "\r[Info] "); fprintf(stderr, __VA_ARGS__); } while(0)
 #define LOG_FLUSH() do { fflush(stderr); } while(0)
 
 #ifdef RT_CUDA_ENABLED

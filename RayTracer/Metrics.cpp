@@ -25,7 +25,7 @@ void Metrics::TriangleIntesected() {
 
 Metrics::Result Metrics::End() {
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    m_current->m_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - m_begin).count();
+    m_current->m_time = static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(end - m_begin).count());
     return std::move(m_current).value();
 }
 

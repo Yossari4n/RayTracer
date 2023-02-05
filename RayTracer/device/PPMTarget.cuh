@@ -112,7 +112,6 @@ PPMTarget::~PPMTarget() {
 }
 
 void PPMTarget::SaveBuffer() {
-    LOG_INFO("Saving buffer\n");
     Color* frameBuffer;
     cudaMallocManaged((void**)&frameBuffer, sizeof(Color) * m_width * m_height);
 
@@ -121,14 +120,15 @@ void PPMTarget::SaveBuffer() {
     CHECK_CUDA( cudaDeviceSynchronize() );
 
     std::cout << "P3\n" << m_width << ' ' << m_height << "\n255\n";
-    for(int i = m_width * m_height - 1; i >= 0; i--) {
+    for(int i = static_cast<int>(m_width * m_height - 1); i >= 0; i--) {
         const Color color = frameBuffer[i];
 
         std::cout << static_cast<int>(256 * glm::clamp(color.r, 0.0f, 0.999f)) << ' '
             << static_cast<int>(256 * glm::clamp(color.g, 0.0f, 0.999f)) << ' '
             << static_cast<int>(256 * glm::clamp(color.b, 0.0f, 0.999f)) << '\n';
     }
-    LOG_INFO("Buffer saved\n");
+
+    LOG_INFO("Saving buffer to standard output\n");
 }
 
 }

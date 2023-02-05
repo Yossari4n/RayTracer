@@ -7,9 +7,10 @@
     #include "device_launch_parameters.h"
     #include "curand_kernel.h"
     #include <curand_kernel.h>
+
+    #define GLM_FORCE_CUDA
 #endif
 
-#define GLM_FORCE_CUDA
 #include <glm/glm.hpp>
 #include <glm/gtx/norm.hpp>
 #pragma warning(pop)

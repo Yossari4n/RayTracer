@@ -143,7 +143,6 @@ __global__ void DeleteKDTreeDeviceObject(IAccelerationStructure::DevicePtr kdtre
 }
 
 void KDTree::PartitionSpace(const MeshList& raytracables) {
-    LOG_INFO("Partition space\n");
     KDTreeNode root(raytracables, m_maxDepth);
     const unsigned int arraySize = static_cast<unsigned int>(std::pow(2U, root.m_depth)) - 1U;
 
@@ -155,7 +154,6 @@ void KDTree::PartitionSpace(const MeshList& raytracables) {
     CreateKDTreeDeviceObject<<<1, 1 >>>(d_KDTree, arraySize, d_meshTree);
     CHECK_CUDA( cudaGetLastError() );
     CHECK_CUDA( cudaDeviceSynchronize() );
-    LOG_INFO("Space partitioned\n");
 }
 
 }

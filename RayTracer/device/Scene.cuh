@@ -66,10 +66,11 @@ public:
     void LoadScene(const std::string& path) {
         tinyobj::ObjReaderConfig config;
 
+        LOG_INFO("Loading scene %s\n", path.c_str());
         tinyobj::ObjReader reader;
         if(!reader.ParseFromFile(path, config)) {
             if(!reader.Error().empty()) {
-                LOG_ERROR("Failed to load scene %s\n", path.c_str());
+                LOG_ERROR("Failed to load scene\n");
             }
             return;
         }
@@ -97,13 +98,14 @@ public:
             }
         }
 
+        LOG_INFO("Partitioning space\n");
         m_accelerationStructure->PartitionSpace(meshes);
     }
 
     Metrics::Result GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth, const Color& missColor, unsigned int tx, unsigned int ty) const {
-        LOG_INFO("Generating frame\n");
         const unsigned int width = static_cast<unsigned int>(m_renderTarget->Width());
         const unsigned int height = static_cast<unsigned int>(m_renderTarget->Height());
+        LOG_INFO("Generating %d x %d frame\n", width, height);
 
         const dim3 blocks(width / tx + 1, height / ty + 1);
         const dim3 threads(tx, ty);
@@ -121,7 +123,6 @@ public:
         CHECK_CUDA( cudaDeviceSynchronize() );
         auto result = Metrics::Instance().End();
 
-        LOG_INFO("Frame generated\n");
         m_renderTarget->SaveBuffer();
 
         return result;

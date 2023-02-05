@@ -63,7 +63,6 @@ __global__ void DeleteCameraDeviceObject(IAccelerationStructure::DevicePtr brute
 }
 
 void BruteForce::PartitionSpace(const MeshList& raytracables) {
-    LOG_INFO("Partition space\n");
     Mesh* d_meshList;
     CHECK_CUDA( cudaMalloc(&d_meshList, sizeof(Mesh) * raytracables.size()) );
 
@@ -81,7 +80,6 @@ void BruteForce::PartitionSpace(const MeshList& raytracables) {
     CreateBruteForceDeviceObject<<<1, 1>>>(d_bruteForce, d_meshList, raytracables.size());
     CHECK_CUDA( cudaGetLastError() );
     CHECK_CUDA( cudaDeviceSynchronize() );
-    LOG_INFO("Space partitioned\n");
 }
 
 BruteForce::~BruteForce() {
