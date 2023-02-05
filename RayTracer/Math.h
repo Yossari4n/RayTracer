@@ -2,17 +2,19 @@
 #define Math_h
 
 #pragma warning(push, 0)
-#include "cuda_runtime.h"
-#include "device_launch_parameters.h"
-#include "curand_kernel.h"
-#include <curand_kernel.h>
-#pragma warning(pop)
+#ifdef RT_CUDA_ENABLED
+    #include "cuda_runtime.h"
+    #include "device_launch_parameters.h"
+    #include "curand_kernel.h"
+    #include <curand_kernel.h>
+#endif
 
-#pragma warning(push, 0)
 #define GLM_FORCE_CUDA
 #include <glm/glm.hpp>
 #include <glm/gtx/norm.hpp>
 #pragma warning(pop)
+
+#include "Build.h"
 
 #include <random>
 
@@ -26,25 +28,25 @@ using Vector3 = glm::vec3;
 #define RANDvec3 glm::vec3(curand_uniform(local_rand_state),curand_uniform(local_rand_state),curand_uniform(local_rand_state))
 
 template <typename T>
-__device__ __host__ inline void Swap(T& a, T& b) {
+RT_DEVICE RT_HOST inline void Swap(T& a, T& b) {
     T c = a;
     a = b;
     b = c;
 }
 
 template <typename T>
-__device__ __host__ inline bool Near(const T& a, const T& b) {
+RT_DEVICE RT_HOST inline bool Near(const T& a, const T& b) {
     const float diff = a - b;
     return diff >= FLT_EPSILON && diff <= FLT_EPSILON;
 }
 
 template <typename T>
-__device__ __host__ inline bool NearZero(const T& a) {
+RT_DEVICE RT_HOST inline bool NearZero(const T& a) {
     return Near(a, 0);
 }
 
 template <>
-__device__ __host__ inline bool NearZero<Vector3>(const Vector3& vec) {
+RT_DEVICE RT_HOST inline bool NearZero<Vector3>(const Vector3& vec) {
     return (fabs(vec.x) < FLT_EPSILON) && (fabs(vec.y) < FLT_EPSILON) && (fabs(vec.z) < FLT_EPSILON);
 }
 
@@ -92,7 +94,8 @@ inline Vector3 RandomInUnitDisk() {
     }
 }
 
-__device__ inline glm::vec3 RandomInUnitSphere(curandState* local_rand_state) {
+#ifdef RT_CUDA_ENABLED
+RT_DEVICE inline glm::vec3 RandomInUnitSphere(curandState* local_rand_state) {
     glm::vec3 p;
     do {
         p = 2.0f * RANDvec3 - glm::vec3(1, 1, 1);
@@ -100,13 +103,15 @@ __device__ inline glm::vec3 RandomInUnitSphere(curandState* local_rand_state) {
     return p;
 }
 
-__device__ inline Vector3 RandomInUnitDisk(curandState* rand) {
+
+RT_DEVICE inline Vector3 RandomInUnitDisk(curandState* rand) {
     glm::vec3 p;
     do {
         p = 2.0f * glm::vec3(curand_uniform(rand), curand_uniform(rand), 0) - glm::vec3(1, 1, 0);
     } while(dot(p, p) >= 1.0f);
     return p;
 }
+#endif
 
 }
 

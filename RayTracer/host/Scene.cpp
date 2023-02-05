@@ -4,7 +4,7 @@
 #include "../tiny_obj_loader.h"
 #pragma warning(pop)
 
-#include "../Mesh.cuh"
+#include "../Mesh.h"
 #include "../Debug.h"
 
 #include <iostream>

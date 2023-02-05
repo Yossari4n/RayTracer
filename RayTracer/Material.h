@@ -5,6 +5,7 @@
 #include "tiny_obj_loader.h"
 #pragma warning(pop)
 
+#include "Build.h"
 #include "Color.h"
 #include "Ray.h"
 #include "Triangle.h"
@@ -71,24 +72,6 @@ public:
         return false;
     }
 
-    __device__ bool Scatter(const Ray& ray, const Triangle::HitRecord& hitRecord, curandState* randState, ScatterResult& result) const {
-        switch(m_type) {
-        case Type::Lambertian:
-            return LambertianScatter(ray, hitRecord, randState, result);
-            break;
-
-        case Type::DiffuseLight:
-            return DiffuseLightScatter(ray, hitRecord, randState, result);
-            break;
-
-        case Type::Debug:
-            return DebugScatter(ray, hitRecord, randState, result);
-            break;
-        }
-
-        return false;
-    }
-
     bool Emit(const Ray& ray, const Triangle::HitRecord& hitRecord, EmitResult& result) const {
         switch(m_type) {
         case Type::Lambertian:
@@ -107,7 +90,26 @@ public:
         return false;
     }
 
-    __device__ bool Emit(const Ray& ray, const Triangle::HitRecord& hitRecord, curandState* randState, EmitResult& result) const {
+#ifdef RT_CUDA_ENABLED
+    RT_DEVICE bool Scatter(const Ray& ray, const Triangle::HitRecord& hitRecord, curandState* randState, ScatterResult& result) const {
+        switch(m_type) {
+        case Type::Lambertian:
+            return LambertianScatter(ray, hitRecord, randState, result);
+            break;
+
+        case Type::DiffuseLight:
+            return DiffuseLightScatter(ray, hitRecord, randState, result);
+            break;
+
+        case Type::Debug:
+            return DebugScatter(ray, hitRecord, randState, result);
+            break;
+        }
+
+        return false;
+    }
+
+    RT_DEVICE bool Emit(const Ray& ray, const Triangle::HitRecord& hitRecord, curandState* randState, EmitResult& result) const {
         switch(m_type) {
         case Type::Lambertian:
             return LambertianEmit(ray, hitRecord, randState, result);
@@ -124,23 +126,11 @@ public:
 
         return false;
     }
+#endif
 
 private:
-    // Lambertian
     bool LambertianScatter(const Ray& ray, const Triangle::HitRecord& hitRecord, ScatterResult& result) const {
         Vector3 scatterDirection = hitRecord.m_normal + RandomUnit();
-
-        if(NearZero(scatterDirection)) {
-            scatterDirection = hitRecord.m_normal;
-        }
-
-        result.m_scattered = Ray(hitRecord.m_point, scatterDirection);
-        result.m_attenuation = m_albedo;
-        return true;
-    }
-
-    __device__ bool LambertianScatter(const Ray& ray, const Triangle::HitRecord& hitRecord, curandState* randState, ScatterResult& result) const {
-        Vector3 scatterDirection = hitRecord.m_normal + RandomInUnitSphere(randState);
 
         if(NearZero(scatterDirection)) {
             scatterDirection = hitRecord.m_normal;
@@ -155,16 +145,7 @@ private:
         return false;
     }
 
-    __device__ bool LambertianEmit(const Ray& ray, const Triangle::HitRecord& hitRecord, curandState* randState, EmitResult& result) const {
-        return false;
-    }
-
-    // Difuse light
     bool DiffuseLightScatter(const Ray& ray, const Triangle::HitRecord& hitRecord, ScatterResult& result) const {
-        return false;
-    }
-
-    __device__ bool DiffuseLightScatter(const Ray& ray, const Triangle::HitRecord& hitRecord, curandState* randState, ScatterResult& result) const {
         return false;
     }
 
@@ -173,27 +154,8 @@ private:
         return true;
     }
 
-    __device__ bool DiffuseLightEmit(const Ray& ray, const Triangle::HitRecord& hitRecord, curandState* randState, EmitResult& result) const {
-        result.m_emitted = m_albedo;
-        return true;
-    }
-
-    // Debug
     bool DebugScatter(const Ray& ray, const Triangle::HitRecord& hitRecord, ScatterResult& result) const {
         Vector3 scatterDirection = hitRecord.m_normal + RandomUnit();
-
-        if(NearZero(scatterDirection)) {
-            scatterDirection = hitRecord.m_normal;
-        }
-
-        result.m_scattered = Ray(hitRecord.m_point, scatterDirection);
-        result.m_attenuation = Color(hitRecord.m_coordinates.x, hitRecord.m_coordinates.y, 1 - hitRecord.m_coordinates.x - hitRecord.m_coordinates.y);
-
-        return true;
-    }
-
-    __device__ bool DebugScatter(const Ray& ray, const Triangle::HitRecord& hitRecord, curandState* randState, ScatterResult& result) const {
-        Vector3 scatterDirection = hitRecord.m_normal + RandomInUnitDisk(randState);
 
         if(NearZero(scatterDirection)) {
             scatterDirection = hitRecord.m_normal;
@@ -209,9 +171,49 @@ private:
         return false;
     }
 
-    __device__ bool DebugEmit(const Ray& ray, const Triangle::HitRecord& hitRecord, curandState* randState, EmitResult& result) const {
+#ifdef RT_CUDA_ENABLED
+    RT_DEVICE bool LambertianScatter(const Ray& ray, const Triangle::HitRecord& hitRecord, curandState* randState, ScatterResult& result) const {
+        Vector3 scatterDirection = hitRecord.m_normal + RandomInUnitSphere(randState);
+
+        if(NearZero(scatterDirection)) {
+            scatterDirection = hitRecord.m_normal;
+        }
+
+        result.m_scattered = Ray(hitRecord.m_point, scatterDirection);
+        result.m_attenuation = m_albedo;
+        return true;
+    }
+
+    RT_DEVICE bool LambertianEmit(const Ray& ray, const Triangle::HitRecord& hitRecord, curandState* randState, EmitResult& result) const {
         return false;
     }
+
+    RT_DEVICE bool DiffuseLightScatter(const Ray& ray, const Triangle::HitRecord& hitRecord, curandState* randState, ScatterResult& result) const {
+        return false;
+    }
+
+    RT_DEVICE bool DiffuseLightEmit(const Ray& ray, const Triangle::HitRecord& hitRecord, curandState* randState, EmitResult& result) const {
+        result.m_emitted = m_albedo;
+        return true;
+    }
+
+    RT_DEVICE bool DebugScatter(const Ray& ray, const Triangle::HitRecord& hitRecord, curandState* randState, ScatterResult& result) const {
+        Vector3 scatterDirection = hitRecord.m_normal + RandomInUnitDisk(randState);
+
+        if(NearZero(scatterDirection)) {
+            scatterDirection = hitRecord.m_normal;
+        }
+
+        result.m_scattered = Ray(hitRecord.m_point, scatterDirection);
+        result.m_attenuation = Color(hitRecord.m_coordinates.x, hitRecord.m_coordinates.y, 1 - hitRecord.m_coordinates.x - hitRecord.m_coordinates.y);
+
+        return true;
+    }
+
+    RT_DEVICE bool DebugEmit(const Ray& ray, const Triangle::HitRecord& hitRecord, curandState* randState, EmitResult& result) const {
+        return false;
+    }
+#endif
 
     Type m_type;
     Color m_albedo;

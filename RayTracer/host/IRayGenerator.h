@@ -9,7 +9,7 @@ class IRayGenerator {
 public:
     virtual ~IRayGenerator() = default;
 
-    __host__ virtual Ray GenerateRay(float s, float t) const = 0;
+    RT_HOST virtual Ray GenerateRay(float s, float t) const = 0;
 };
 
 }

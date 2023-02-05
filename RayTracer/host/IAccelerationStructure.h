@@ -3,7 +3,7 @@
 
 #include "../Color.h"
 #include "../Ray.h"
-#include "../Mesh.cuh"
+#include "../Mesh.h"
 
 namespace rt {
 

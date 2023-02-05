@@ -5,12 +5,14 @@
 #include <RayTracer/host/PPMTarget.h>
 #include <RayTracer/host/Scene.h>
 
-#include <RayTracer/device/Camera.cuh>
-#include <RayTracer/device/PPMTarget.cuh>
-#include <RayTracer/device/BruteForce.cuh>
-#include <RayTracer/device/BVH.cuh>
-#include <RayTracer/device/KDTree.cuh>
-#include <RayTracer/device/Scene.cuh>
+#ifdef RT_CUDA_ENABLED
+    #include <RayTracer/device/Camera.cuh>
+    #include <RayTracer/device/PPMTarget.cuh>
+    #include <RayTracer/device/BruteForce.cuh>
+    #include <RayTracer/device/BVH.cuh>
+    #include <RayTracer/device/KDTree.cuh>
+    #include <RayTracer/device/Scene.cuh>
+#endif
 
 #define TINYOBJLOADER_IMPLEMENTATION 
 #include "../RayTracer/tiny_obj_loader.h"
@@ -19,6 +21,9 @@
 #include <nlohmann/json.hpp>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 #pragma warning(pop)
 
 #include <iostream>
@@ -110,67 +115,7 @@ void from_json(const nlohmann::json& json, Config& config) {
 }
 
 //-----------------------------------------------------------------------------------
-// OpenGL
-class Renderer {
-public:
-    Renderer(size_t width, size_t height, const std::string& title)
-        : m_width(width)
-        , m_height(height)
-        , m_title(title) {
-        glfwInit();
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-        glfwWindowHint(GLFW_SAMPLES, 4);
-
-        m_handle = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
-        glfwSetWindowUserPointer(m_handle, this);
-        glfwSetWindowTitle(m_handle, title.c_str());
-
-        glfwMakeContextCurrent(m_handle);
-        glfwSetFramebufferSizeCallback(m_handle, Renderer::FramebufferSizeCallback);
-
-        if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-            return;
-        }
-
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_MULTISAMPLE);
-    }
-
-    ~Renderer() {
-        glfwTerminate();
-    }
-
-    Renderer(const Renderer&) = delete;
-    Renderer& operator=(const Renderer&) = delete;
-
-    void StartRenderLoop() const {
-        while(!glfwWindowShouldClose(m_handle)) {
-            glfwPollEvents();
-           // drawing
-            glfwSwapBuffers(m_handle);
-        }
-    }
-
-private:
-    static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
-
-    size_t m_width;
-    size_t m_height;
-    std::string m_title;
-    GLFWwindow* m_handle{ nullptr };
-};
-
-void Renderer::FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
-    auto renderer = static_cast<Renderer*>(glfwGetWindowUserPointer(window));
-    renderer->m_width = width;
-    renderer->m_height = height;
-    glViewport(0, 0, width, height);
-}
-
-//-----------------------------------------------------------------------------------
-// 
+//
 void HostMain(const Config& config) {
     std::unique_ptr<rt::IRayGenerator> rayGenerator;
     if(config.rayGenerator.name == "Camera") {
@@ -216,56 +161,54 @@ void HostMain(const Config& config) {
     outputStream << std::setw(4) << jsonResult << std::endl;
 }
 
-void DeviceMain(const Config& config) {
-    std::unique_ptr<rt::device::IRayGenerator> rayGenerator;
-    if(config.rayGenerator.name == "Camera") {
-        rayGenerator = std::make_unique<rt::device::Camera>(
-            config.rayGenerator.position,
-            config.rayGenerator.lookAt,
-            rt::Vector3(0.0f, 1.0f, 0.0f),      // up
-            config.rayGenerator.fov,
-            16.0f / 9.0f,                       // aspect ratio
-            0.1f,                               // aperture
-            10.0f                               // focus_distance
+#ifdef RT_CUDA_ENABLED
+    void DeviceMain(const Config& config) {
+        std::unique_ptr<rt::device::IRayGenerator> rayGenerator;
+        if(config.rayGenerator.name == "Camera") {
+            rayGenerator = std::make_unique<rt::device::Camera>(
+                config.rayGenerator.position,
+                config.rayGenerator.lookAt,
+                rt::Vector3(0.0f, 1.0f, 0.0f),      // up
+                config.rayGenerator.fov,
+                16.0f / 9.0f,                       // aspect ratio
+                0.1f,                               // aperture
+                10.0f                               // focus_distance
+            );
+        }
+    
+        std::unique_ptr<rt::device::IAccelerationStructure> accelerationStructure;
+        if(config.accelerationStructure.name == "BruteForce") {
+            accelerationStructure = std::make_unique<rt::device::BruteForce>();
+        } else if(config.accelerationStructure.name == "BVH") {
+            accelerationStructure = std::make_unique<rt::device::BVH>();
+        } else if(config.accelerationStructure.name == "KDTree") {
+            accelerationStructure = std::make_unique<rt::device::KDTree>(config.accelerationStructure.depth);
+        }
+    
+        std::unique_ptr<rt::device::IRenderTarget> renderTarget;
+        if(config.renderTarget.name == "PPMTarget") {
+            renderTarget = std::make_unique<rt::device::PPMTarget>(
+                config.renderTarget.width,
+                config.renderTarget.height
+            );
+        }
+    
+        rt::device::Scene scene(
+            rayGenerator.get(),
+            accelerationStructure.get(),
+            renderTarget.get()
         );
+    
+        scene.LoadScene(config.scene);
+        auto result = scene.GenerateFrame(config.samplesPerPixel, config.maxDepth, config.missColor, 8, 8);
+    
+        nlohmann::json jsonResult = result;
+        std::ofstream outputStream(config.metricsOutput);
+        outputStream << std::setw(4) << jsonResult << std::endl;
     }
-
-    std::unique_ptr<rt::device::IAccelerationStructure> accelerationStructure;
-    if(config.accelerationStructure.name == "BruteForce") {
-        accelerationStructure = std::make_unique<rt::device::BruteForce>();
-    } else if(config.accelerationStructure.name == "BVH") {
-        accelerationStructure = std::make_unique<rt::device::BVH>();
-    } else if(config.accelerationStructure.name == "KDTree") {
-        accelerationStructure = std::make_unique<rt::device::KDTree>(config.accelerationStructure.depth);
-    }
-
-    std::unique_ptr<rt::device::IRenderTarget> renderTarget;
-    if(config.renderTarget.name == "PPMTarget") {
-        renderTarget = std::make_unique<rt::device::PPMTarget>(
-            config.renderTarget.width,
-            config.renderTarget.height
-        );
-    }
-
-    rt::device::Scene scene(
-        rayGenerator.get(),
-        accelerationStructure.get(),
-        renderTarget.get()
-    );
-
-    scene.LoadScene(config.scene);
-    auto result = scene.GenerateFrame(config.samplesPerPixel, config.maxDepth, config.missColor, 8, 8);
-
-    nlohmann::json jsonResult = result;
-    std::ofstream outputStream(config.metricsOutput);
-    outputStream << std::setw(4) << jsonResult << std::endl;
-}
+#endif
 
 int main(int argc, char* argv[]) {
-    Renderer renderer(800, 600, "Test");
-    renderer.StartRenderLoop();
-
-    return;
     if(argc < 2) {
         std::cerr << "No config file provided\n";
         return EXIT_FAILURE;
@@ -291,7 +234,11 @@ int main(int argc, char* argv[]) {
     if(!config.cuda) {
         HostMain(config);
     } else {
+#ifdef RT_CUDA_ENABLED
         DeviceMain(config);
+#else
+        std::cerr << "CUDA config not supported\n";
+#endif
     }
 
     return EXIT_SUCCESS;

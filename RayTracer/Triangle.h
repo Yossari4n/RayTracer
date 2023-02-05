@@ -2,12 +2,15 @@
 #define Triangle_h
 
 #pragma warning(push, 0)
-#include "cuda_runtime.h"
-#include "device_launch_parameters.h"
-#include "curand_kernel.h"
-#include <curand_kernel.h>
+#ifdef RT_CUDA_ENABLED
+    #include "cuda_runtime.h"
+    #include "device_launch_parameters.h"
+    #include "curand_kernel.h"
+    #include <curand_kernel.h>
+#endif
 #pragma warning(pop)
 
+#include "Build.h"
 #include "Math.h"
 #include "Ray.h"
 
@@ -22,14 +25,14 @@ public:
         float m_time;
     };
 
-    __host__ __device__ Triangle() = default;
+    RT_DEVICE RT_HOST Triangle() = default;
 
-    __host__ __device__ Triangle(const Point3& v1, const Point3& v2, const Point3& v3)
+    RT_DEVICE RT_HOST Triangle(const Point3& v1, const Point3& v2, const Point3& v3)
         : m_v0(v1)
         , m_v1(v2)
         , m_v2(v3) {}
 
-    __host__ __device__ bool Hit(const Ray& ray, float minTime, float maxTime, HitRecord& record) const {
+    RT_DEVICE RT_HOST bool Hit(const Ray& ray, float minTime, float maxTime, HitRecord& record) const {
         const Vector3 edge1 = m_v1 - m_v0;
         const Vector3 edge2 = m_v2 - m_v0;
 
@@ -62,16 +65,16 @@ public:
         return true;
     }
 
-    __host__ __device__ Point3 MidPoint() const {
+    RT_DEVICE RT_HOST Point3 MidPoint() const {
         const float x = (m_v0.x + m_v1.x + m_v2.x) / 3.0f;
         const float y = (m_v0.y + m_v1.y + m_v2.y) / 3.0f;
         const float z = (m_v0.z + m_v1.z + m_v2.z) / 3.0f;
         return Point3(x, y, z);
     }
 
-    __host__ __device__ Point3 V0() const { return m_v0; }
-    __host__ __device__ Point3 V1() const { return m_v1; }
-    __host__ __device__ Point3 V2() const { return m_v2; }
+    RT_DEVICE RT_HOST Point3 V0() const { return m_v0; }
+    RT_DEVICE RT_HOST Point3 V1() const { return m_v1; }
+    RT_DEVICE RT_HOST Point3 V2() const { return m_v2; }
 
 private:
     Point3 m_v0{0.0f};

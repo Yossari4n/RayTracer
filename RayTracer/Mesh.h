@@ -2,14 +2,15 @@
 #define Mesh_h
 
 #pragma warning(push, 0)
-#include "tiny_obj_loader.h"
-
-#include "cuda_runtime.h"
-#include "device_launch_parameters.h"
-#include "curand_kernel.h"
-#include <curand_kernel.h>
+#ifdef RT_CUDA_ENABLED
+    #include "cuda_runtime.h"
+    #include "device_launch_parameters.h"
+    #include "curand_kernel.h"
+    #include <curand_kernel.h>
+#endif
 #pragma warning(pop)
 
+#include "Build.h"
 #include "Material.h"
 #include "Color.h"
 #include "Ray.h"
@@ -173,7 +174,8 @@ public:
         return RayTraceResult::Emitted;
     }
 
-    __device__ RayTraceResult RayTrace(const Ray& ray, float minTime, float maxTime, curandState* randState, RayTraceRecord& result) const {
+#ifdef RT_CUDA_ENABLED
+    RT_DEVICE RayTraceResult RayTrace(const Ray& ray, float minTime, float maxTime, curandState* randState, RayTraceRecord& result) const {
         Triangle::HitRecord closestHit{};
         closestHit.m_time = maxTime;
 
@@ -202,6 +204,7 @@ public:
 
         return RayTraceResult::Emitted;
     }
+#endif
 
     std::pair<std::optional<Mesh>, std::optional<Mesh>> Split(const Point3& splitPoint, SplitAxis axis) const {
         std::vector<Triangle> furthers;

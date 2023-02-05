@@ -6,12 +6,13 @@ set(LIBRARY_PRIVATE_INCLUDE_PATH	"${LIBRARY_MODULE_PATH}")
 
 set(
 	SOURCE_LIST
+	"Build.h"
 	"Color.h"
 	"Math.h"
 	"Ray.h"
 	"Triangle.h"
 	"AABB.h"
-	"Mesh.cuh"
+	"Mesh.h"
 	"Material.h"
 	"Debug.h"
 	"BVHNode.h"
@@ -38,24 +39,35 @@ set(
 	"host/BVH.cpp"
 	"host/KDTree.h"
 	"host/KDTree.cpp"
-
-	"device/Scene.cuh"
-	"device/IRayGenerator.cuh"
-	"device/Camera.cuh"
-	"device/IRenderTarget.cuh"
-	"device/PPMTarget.cuh"
-	"device/IAccelerationStructure.cuh"
-	"device/BruteForce.cuh"
-	"device/BVH.cuh"
-	"device/KDTree.cuh"
 )
+
+if(ENABLE_CUDA)
+	set(
+		CUDA_SOURCE_LIST
+		"device/Scene.cuh"
+		"device/IRayGenerator.cuh"
+		"device/Camera.cuh"
+		"device/IRenderTarget.cuh"
+		"device/PPMTarget.cuh"
+		"device/IAccelerationStructure.cuh"
+		"device/BruteForce.cuh"
+		"device/BVH.cuh"
+		"device/KDTree.cuh"
+	)
+else(ENABLE_CUDA)
+	set(
+		CUDA_SOURCE_LIST
+		""
+	)
+endif(ENABLE_CUDA)
 
 add_library(
 	${LIBRARY_NAME}
 	${SOURCE_LIST}
+	${CUDA_SOURCE_LIST}
 )
 
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_LIST})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_LIST} ${CUDA_SOURCE_LIST})
 
 target_include_directories(${LIBRARY_NAME}
     PUBLIC

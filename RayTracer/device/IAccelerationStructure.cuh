@@ -9,7 +9,7 @@
 #pragma warning(pop)
 
 #include "../Color.h"
-#include "../Mesh.cuh"
+#include "../Mesh.h"
 
 namespace rt::device {
 
