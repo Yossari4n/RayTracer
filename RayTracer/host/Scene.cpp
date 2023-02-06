@@ -52,20 +52,21 @@ void Scene::LoadScene(const std::string& path) {
         }
     }
 
-    LOG_INFO("Partitioning space\n");
+    LOG_INFO("Partitioning space...");
+    Metrics::Instance().BeginSpacePartitioning();
     m_accelerationStructure->PartitionSpace(meshes);
+    float spacePartitionTime = Metrics::Instance().EndSpaceParitioning();
+    LOG(" Done (%.2fms)\n", spacePartitionTime);
 }
 
 Metrics::Result Scene::GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth, const Color& missColor) const {
     const int width = static_cast<int>(m_renderTarget->Width());
     const int height = static_cast<int>(m_renderTarget->Height());
 
-    LOG_INFO("Generating %d x %d frame\n", width, height);
-    Metrics::Instance().Begin();
-    for(int j = height - 1; j >= 0; j--) {
-        LOG_INFO("Scanlines remaining: %d", j);
-        LOG_FLUSH();
+    LOG_INFO("Generating %d x %d frame...", width, height);
 
+    Metrics::Instance().BeginFrame();
+    for(int j = height - 1; j >= 0; j--) {
         for(int i = 0; i < width; i++) {
             Color color(0.0f);
 
@@ -81,13 +82,16 @@ Metrics::Result Scene::GenerateFrame(unsigned int samplesPerPixel, unsigned int 
             m_renderTarget->WriteColor(i, height - j - 1U, color, samplesPerPixel);
         }
     }
-    auto result = Metrics::Instance().End();
+    const auto frameTime = Metrics::Instance().EndFrame();
+    LOG(" Done (%.2fms)\n", frameTime);
 
-    LOG_INFO("\n");
-    LOG_INFO("Saving buffer to standard output\n");
+    LOG_INFO("Saving buffer... ");
+    Metrics::Instance().BeginSaveBuffer();
     m_renderTarget->SaveBuffer();
+    const auto saveBufferTime = Metrics::Instance().EndSaveBuffer();
+    LOG(" Done (%.2fms)\n", saveBufferTime);
 
-    return result;
+    return Metrics::Instance().Value();
 }
 
 }

@@ -1,7 +1,6 @@
 #ifndef Metrics_h
 #define Metrics_h
 
-#include <optional>
 #include <chrono>
 
 namespace rt {
@@ -9,7 +8,9 @@ namespace rt {
 class Metrics {
 public:
     struct Result {
-        float m_time{ 0U };
+        float m_spacePartitioningTime{ 0.0f };
+        float m_frameTime{ 0.0f };
+        float m_saveBufferTime{ 0.0f };
         unsigned long long int m_rayCreations{ 0U };
         unsigned long long int m_volumeTests{ 0U };
         unsigned long long int m_triangleTests{ 0U };
@@ -26,18 +27,28 @@ public:
         return instance;
     }
 
-    void Begin();
+    void BeginSpacePartitioning();
+    void BeginFrame();
+    void BeginSaveBuffer();
+
+    float EndSpaceParitioning();
+    float EndFrame();
+    float EndSaveBuffer();
+
     void RayCreated();
     void VolumeTested();
     void TriangleTested();
     void TriangleIntesected();
-    Result End();
+
+    Result Value();
 
 private:
     Metrics() = default;
 
-    std::optional<Result> m_current;
-    std::chrono::steady_clock::time_point m_begin;
+    Result m_current;
+    std::chrono::steady_clock::time_point m_spacePartitioningBegin;
+    std::chrono::steady_clock::time_point m_frameBegin;
+    std::chrono::steady_clock::time_point m_saveBufferBegin;
 };
 
 }

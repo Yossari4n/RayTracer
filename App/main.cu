@@ -83,7 +83,9 @@ namespace rt {
 
 void to_json(nlohmann::json& j, const rt::Metrics::Result& result) {
     j = nlohmann::json{
-        {"time_elapsed", result.m_time},
+        {"space_partitioning_time", result.m_spacePartitioningTime},
+        {"frame_time", result.m_frameTime},
+        {"save_buffer_time", result.m_saveBufferTime},
         {"rays_created", result.m_rayCreations},
         {"volumes_tested", result.m_volumeTests},
         {"triangles_tested", result.m_triangleTests},

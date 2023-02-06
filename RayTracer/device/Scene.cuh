@@ -98,14 +98,18 @@ public:
             }
         }
 
-        LOG_INFO("Partitioning space\n");
+        LOG_INFO("Partitioning space...");
+        Metrics::Instance().BeginSpacePartitioning();
         m_accelerationStructure->PartitionSpace(meshes);
+        float spacePartitionTime = Metrics::Instance().EndSpaceParitioning();
+        LOG(" Done (%.2fms)\n", spacePartitionTime);
     }
 
     Metrics::Result GenerateFrame(unsigned int samplesPerPixel, unsigned int maxDepth, const Color& missColor, unsigned int tx, unsigned int ty) const {
         const unsigned int width = static_cast<unsigned int>(m_renderTarget->Width());
         const unsigned int height = static_cast<unsigned int>(m_renderTarget->Height());
-        LOG_INFO("Generating %d x %d frame\n", width, height);
+
+        LOG_INFO("Generating %d x %d frame...", width, height);
 
         const dim3 blocks(width / tx + 1, height / ty + 1);
         const dim3 threads(tx, ty);
@@ -117,15 +121,20 @@ public:
         CHECK_CUDA( cudaGetLastError() );
         CHECK_CUDA( cudaDeviceSynchronize() );
 
-        Metrics::Instance().Begin();
+        Metrics::Instance().BeginFrame();
         GenerateFrameKernel<<<blocks, threads>>>(samplesPerPixel, maxDepth, missColor, m_rayGenerator->ToDevice(), m_accelerationStructure->ToDevice(), m_renderTarget->ToDevice(), state);
         CHECK_CUDA( cudaGetLastError() );
         CHECK_CUDA( cudaDeviceSynchronize() );
-        auto result = Metrics::Instance().End();
+        const auto frameTime = Metrics::Instance().EndFrame();
+        LOG(" Done (%.2fms)\n", frameTime);
 
+        LOG_INFO("Saving buffer... ");
+        Metrics::Instance().BeginSaveBuffer();
         m_renderTarget->SaveBuffer();
+        const auto saveBufferTime = Metrics::Instance().EndSaveBuffer();
+        LOG(" Done (%.2fms)\n", saveBufferTime);
 
-        return result;
+        return Metrics::Instance().Value();
     }
 
 private:
